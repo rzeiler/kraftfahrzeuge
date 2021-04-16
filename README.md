@@ -1,6 +1,6 @@
-# Vuegram
+# Kraftfahrzeuge
 
-> A simple social media web app built with Vue.js and Firebase's Cloud Firestore as a way to teach people how to build a real-world app using the two technologies. Follow along with our tutorial, [Building a Real-World Web App With Vue.js and Firebase](http://savvyapps.com/blog/definitive-guide-building-web-app-vuejs-firebase), to learn core Vue.js concepts and build this project.
+ 
 
 ### Changelog
 *We just released a major update in July 2020!* This release includes the current Vue CLI, async/await instead of promise chaining, and a structure overhaul incorporating updated best practices. The flow remains unchanged with some updates to match the current Firebase SDK. All code for the rewrite can be found in the project's `master` branch, while the old code remains in `original-deprecated` for posterity.
@@ -40,14 +40,10 @@ npm install
 # start local server @ localhost:8080
 npm run dev
 ```
-### Tutorial
-
-> For further instructions on building this project, [refer to our Vue.js tutorial](http://savvyapps.com/blog/definitive-guide-building-web-app-vuejs-firebase). You'll find it and many more resources on the [Savvy Apps blog](https://savvyapps.com/blog). Feel free to reach out to us with any questions or feedback via the [Savvy Apps website](https://savvyapps.com/), or connect with us on [Facebook](https://www.facebook.com/savvyapps/) and [Twitter](https://twitter.com/savvyapps).
-
 ### License
 
 ```
-Copyright 2020 Savvy Apps
+Copyright 2020 rzeiler
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
