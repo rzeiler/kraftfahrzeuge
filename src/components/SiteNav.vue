@@ -1,30 +1,38 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container">
-      <a class="navbar-brand" href="#">Kraftfahrzeuge</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <router-link class="nav-link" to="/">Dashboard</router-link>
-          </li>
-          <li class="nav-item">
-            <router-link class="nav-link" to="/settings">Settings</router-link>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" @click="logout()">Abmelden</a>
-          </li>
-        </ul>
-      </div>
+  <div class="d-flex justify-content-between p-2">
+    <div class="dropdown mt-2">
+      <button
+        class="btn btn-flat"
+        type="button"
+        id="dropdownMenuButton1"
+        data-bs-toggle="dropdown"
+      >
+        <i class="fas fa-bars"></i>
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+        <li>
+          <router-link class="dropdown-item" to="/">Liste</router-link>
+        </li>
+        <li>
+          <router-link class="dropdown-item" to="/settings"
+            >Einstellungen</router-link
+          >
+        </li>
+        <li>
+          <a class="dropdown-item" @click="logout()" href="#">Abmelden</a>
+        </li>
+      </ul>
     </div>
-  </nav>
+    <h1 class="display-1 pe-2">Liste</h1>
+  </div>
 </template>
 
 <script>
-  export default {
-    methods: {
-      logout() {
-        this.$store.dispatch("logout");
-      },
-    },
-  };
+export default {
+  methods: {
+    logout() {
+      this.$store.dispatch("logout");
+    }
+  }
+};
 </script>

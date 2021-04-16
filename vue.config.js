@@ -1,8 +1,8 @@
 module.exports = {
   outputDir: "docs",
-  publicPath: '/tilgungsplanner/',
+  publicPath: '/kraftfahrzeuge/',
   pwa: {
-    name: 'Tilgungsplanner',
+    name: 'Kraftfahrzeuge',
     themeColor: '#dbdbde',
     backgroundBolor: '#dbdbde',
     appleMobileWebAppCapable: 'yes',

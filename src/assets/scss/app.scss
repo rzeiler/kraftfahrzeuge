@@ -8,6 +8,9 @@
     font-size: 200%;
 }
     
+html{
+  scroll-behavior: smooth;
+}
 
 /*!
  * Bootstrap v5.0.0-beta3 (https://getbootstrap.com/)
@@ -19,7 +22,11 @@
 // scss-docs-start import-stack
 // Configuration
 @import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
+//@import "~bootstrap/scss/_variables";
+@import "_variables copy";
+
+ 
+
 
 $theme-colors: (
   "primary":    $primary,
@@ -40,10 +47,10 @@ $theme-colors: (
 @import "~bootstrap/scss/root";
 @import "~bootstrap/scss/reboot";
 @import "~bootstrap/scss/type";
-@import "~bootstrap/scss/images";
+//@import "~bootstrap/scss/images";
 @import "~bootstrap/scss/containers";
 @import "~bootstrap/scss/grid";
-@import "~bootstrap/scss/tables";
+//@import "~bootstrap/scss/tables";
 @import "~bootstrap/scss/forms";
 @import "~bootstrap/scss/buttons";
 @import "~bootstrap/scss/transitions";
@@ -52,21 +59,21 @@ $theme-colors: (
 @import "~bootstrap/scss/nav";
 @import "~bootstrap/scss/navbar";
 @import "~bootstrap/scss/card";
-@import "~bootstrap/scss/accordion";
-@import "~bootstrap/scss/breadcrumb";
-@import "~bootstrap/scss/pagination";
-@import "~bootstrap/scss/badge";
+//@import "~bootstrap/scss/accordion";
+//@import "~bootstrap/scss/breadcrumb";
+//@import "~bootstrap/scss/pagination";
+//@import "~bootstrap/scss/badge";
 @import "~bootstrap/scss/alert";
-@import "~bootstrap/scss/progress";
-@import "~bootstrap/scss/list-group";
+//@import "~bootstrap/scss/progress";
+//@import "~bootstrap/scss/list-group";
 @import "~bootstrap/scss/close";
 @import "~bootstrap/scss/toasts";
 @import "~bootstrap/scss/modal";
 @import "~bootstrap/scss/tooltip";
 @import "~bootstrap/scss/popover";
-@import "~bootstrap/scss/carousel";
+//@import "~bootstrap/scss/carousel";
 @import "~bootstrap/scss/spinners";
-@import "~bootstrap/scss/offcanvas";
+//@import "~bootstrap/scss/offcanvas";
 
 // Helpers
 @import "~bootstrap/scss/helpers";
@@ -74,3 +81,23 @@ $theme-colors: (
 // Utilities
 @import "~bootstrap/scss/utilities/api";
 // scss-docs-end import-stack
+
+
+[v-cloak] {
+	display: none;
+}
+
+// transitions
+
+.fade-enter-active {
+	transition: opacity 0.5s;
+}
+
+.fade-leave-active {
+	transition: opacity 0s;
+}
+
+.fade-enter,
+.fade-leave-to {
+	opacity: 0;
+}
