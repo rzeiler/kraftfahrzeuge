@@ -34,6 +34,7 @@ const store = new Vuex.Store({
   state: {
     userProfile: {},
     vehicles: [],
+    item: null,
     error: null,
   },
   mutations: {
@@ -48,6 +49,9 @@ const store = new Vuex.Store({
     },
     setPosts(state, val) {
       state.vehicles = val;
+    },
+    setVehicle(state, val) {
+      state.vehicle = val;
     },
   },
   actions: {
@@ -97,6 +101,10 @@ const store = new Vuex.Store({
         router.push("/");
       }
     },
+
+
+
+
     async logout({ commit }) {
       // log user out
       await fb.auth.signOut();
@@ -107,6 +115,17 @@ const store = new Vuex.Store({
       // redirect to login view
       router.push("/login");
     },
+    async getVehicle({ state, commit }, key) {
+console.log("getVehicle");
+ 
+  
+
+      
+       commit("setVehicle", state.vehicles.find((v) => v.id === key));
+
+    },
+
+
     async createVehicle({ state, commit }, vehicle) {
       // create in firebase
       await fb.vehiclesCollection.add({
@@ -119,24 +138,16 @@ const store = new Vuex.Store({
         oil:[]
       });
     },
-    async likePost({ commit }, post) {
-      const userId = fb.auth.currentUser.uid;
-      const docId = `${userId}_${post.id}`;
-
-      // // check if user has liked post
-      // const doc = await fb.likesCollection.doc(docId).get()
-      // if (doc.exists) { return }
-
-      // // create post
-      // await fb.likesCollection.doc(docId).set({
-      //   postId: post.id,
-      //   userId: userId
-      // })
-
-      // // update post likes count
-      // fb.vehiclesCollection.doc(post.id).update({
-      //   likes: post.likesCount + 1
-      // })
+    async updateVehicle({ state, commit }, vehicle) {
+      // create in firebase
+      await fb.vehiclesCollection.doc(vehicle.key).update({
+        title: vehicle.title,
+        mileage: vehicle.mileage,
+        nextcheck: vehicle.nextcheck,
+        uid: fb.auth.currentUser.uid,
+        userName: state.userProfile.name,
+        oil:[]
+      });
     },
     async updateProfile({ dispatch }, user) {
       const userId = fb.auth.currentUser.uid;

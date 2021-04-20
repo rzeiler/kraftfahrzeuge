@@ -23,7 +23,7 @@
         </li>
       </ul>
     </div>
-    <h1 class="display-1 pe-2">Liste</h1>
+    <h1 class="display-1 pe-2"></h1>
   </div>
 </template>
 

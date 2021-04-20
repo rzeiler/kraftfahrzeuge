@@ -1,124 +1,132 @@
 <template>
-  <form>
-    {{ $route.params.id }}
+  <div v-if="vehicle">
+    <form v-if="!showModal">
+      <label for="title" class="form-label">Marke</label>
+      <input
+        type="title"
+        class="form-control"
+        id="title"
+        placeholder="Skoda..."
+        v-model.trim="vehicle.title"
+      />
 
-    {{ vehicles.length }}
-    <div v-if="vehicles.length">
-      <div class="mb-3">
-        <label for="title" class="form-label">Marke</label>
-        <input
-          type="title"
-          class="form-control"
-          id="title"
-          placeholder="Skoda..."
-          v-model.trim="vehicle.title"
-        />
-      </div>
-      <div class="mb-3">
-        <label for="mileage" class="form-label">Kilometerstand</label>
-        <input
-          type="number"
-          class="form-control"
-          id="mileage"
-          placeholder="10312..."
-          v-model.trim="vehicle.mileage"
-        />
-      </div>
-      <div class="mb-3">
-        <label for="nextcheck" class="form-label">HU / AU Termin</label>
-        <input
-          type="Date"
-          class="form-control"
-          id="nextcheck"
-          defaultValue="01.01.2020"
-          placeholder="12.2.2022..."
-          v-model.trim="vehicle.nextcheck"
-        />
-      </div>
-      <button type="button" @click="create()" class="btn btn-success">
-        Speichern
+      <label for="mileage" class="form-label">Kilometerstand</label>
+      <input
+        type="number"
+        class="form-control"
+        id="mileage"
+        placeholder="10312..."
+        v-model.trim="vehicle.mileage"
+      />
+
+      <label for="nextcheck" class="form-label">HU / AU Termin</label>
+      <input
+        type="Date"
+        class="form-control"
+        id="nextcheck"
+        defaultValue="01.01.2020"
+        placeholder="12.2.2022..."
+        v-model.trim="vehicle.nextcheck"
+      />
+
+      <button
+        v-if="vehicle.uid"
+        type="button"
+        @click="update()"
+        class="btn btn-success"
+      >
+        Ändern
+      </button>
+      <button v-else type="button" @click="create()" class="btn btn-success">
+        Hinzufügen
       </button>
 
-      <!-- Button trigger modal -->
       <button
+        v-if="vehicle.uid"
+        v-on:click="confirmDelete"
         type="button"
         class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#staticBackdrop"
       >
         Löschen
       </button>
+    </form>
+    <div
+      v-if="showModal"
+      class="modal fade"
+      id="staticBackdrop"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      tabindex="-1"
+      aria-labelledby="staticBackdropLabel"
+      aria-hidden="true"
+    >
+      <h1>Achtung</h1>
+      <h2>Soll das Fahrzeug wirklich gelöscht werden?</h2>
 
-      <!-- Modal -->
-      <div
-        class="modal fade"
-        id="staticBackdrop"
-        data-bs-backdrop="static"
-        data-bs-keyboard="false"
-        tabindex="-1"
-        aria-labelledby="staticBackdropLabel"
-        aria-hidden="true"
+      <button
+        type="button"
+        class="btn btn-secondary"
+        v-on:click="confirmDelete"
       >
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="staticBackdropLabel">Achtung</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="modal-body">
-              Soll das Fahrzeug wirklich gelöscht werden?  
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Close
-              </button>
-              <button type="button" class="btn btn-primary"  data-bs-dismiss="modal" @click="remove()">
-                Löschen
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+        Abbrechen
+      </button>
+      <button type="button" class="btn btn-primary" @click="remove()">
+        Löschen
+      </button>
     </div>
-  </form>
+  </div>
 </template>
 
 <script>
 import { vehiclesCollection } from "@/firebase";
 import { mapState, mapGetters } from "vuex";
+
 import moment from "moment";
 import Router from "vue-router";
+
+const defaultDate = {
+  title: null,
+  mileage: null,
+  nextcheck: null,
+  uid: null,
+  oil: []
+};
 
 export default {
   components: {},
   data() {
     return {
-      vehicle: {
-        title: null,
-        mileage: null,
-        nextcheck: null
-      },
-      showCommentModal: false,
-      selectedPost: {},
-      showPostModal: false,
-      fullPost: {},
-      postComments: []
+      showModal: false
     };
   },
   computed: {
-    ...mapState(["vehicles"]),
-    ...mapGetters(["getVehicleById"])
+    vehicle() {
+      const id = this.$route.params.id;
+      if (id != "new") {
+        const data = this.$store.state.vehicles.find(
+          v => v.id === this.$route.params.id
+        );
+        if (data) {
+          const date = new Date(data.nextcheck.seconds * 1000);
+          return {
+            title: data.title,
+            mileage: data.mileage,
+            nextcheck: moment(date).format("YYYY-MM-DD"),
+            uid: data.uid,
+            oil: []
+          };
+        } else {
+          return defaultDate;
+        }
+      } else {
+        return defaultDate;
+      }
+    }
   },
   methods: {
+    confirmDelete() {
+      this.showModal = !this.showModal;
+    },
     remove() {
       const self = this;
       this.$store
@@ -138,9 +146,6 @@ export default {
           nextcheck: moment(this.vehicle.nextcheck).toDate()
         })
         .then(function() {
-          self.vehicle.title = null;
-          self.vehicle.mileage = null;
-          self.vehicle.nextcheck = null;
           self.$router.push({ path: "/" });
         });
     },
@@ -148,41 +153,34 @@ export default {
       const self = this;
       this.$store
         .dispatch("updateVehicle", {
+          key: this.$route.params.id,
           title: this.vehicle.title,
           mileage: this.vehicle.mileage,
           nextcheck: moment(this.vehicle.nextcheck).toDate()
         })
         .then(
           function() {
-            //self.$router.go("/");
-            self.$router.push({ path: "dashboard" });
+            self.$router.push({ path: "/" });
           },
           function(err) {
             console.log(err);
           }
         );
-    },
-    get: async function() {
-      const vehicle = this.getVehicleById(this.$route.params.id);
-
-      console.log(vehiclesCollection);
-
-      if (vehicle) {
-        const newObj = { ...vehicle };
-        const nextcheck = { ...newObj.nextcheck };
-        const date = new Date(nextcheck.seconds * 1000);
-
-        this.vehicle.title = newObj.title;
-        this.vehicle.mileage = newObj.mileage;
-        this.vehicle.nextcheck = moment(date).format("YYYY-MM-DD");
-      } else {
-        //this.$refs.nextcheck.value = moment(new Date).format("YYYY-MM-DD");
-      }
     }
   },
-  filters: {},
-  mounted() {
-    this.get();
+  mounted() {},
+  filters: {
+    json(val) {
+      return JSON.stringify(val);
+    },
+    formatDate(val) {
+      if (!val) {
+        return "-";
+      }
+      moment.locale("de");
+      let date = val.toDate();
+      return moment(date).format("MM.YYYY");
+    }
   }
 };
 </script>
@@ -194,4 +192,24 @@ export default {
 </style>
 
 <style lang="scss" scoped>
+button {
+  color: #fff;
+  background-color: #0d6efd;
+  border: 1px solid #0d6efd;
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1.5;
+
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  border-radius: 0.25rem;
+}
 </style>

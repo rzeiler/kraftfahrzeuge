@@ -7,50 +7,73 @@
         @close="toggleCommentModal()"
       ></CommentModal>
     </transition>
-    <section>
-      <div class="col2">
-        <div v-if="vehicles.length">
-          <div v-for="vehicle in vehicles" :key="vehicle.id" class="card m-3">
-            <div class="card-body">
-              <p class="card-text">Marke: {{ vehicle.title }}</p>
-              <p class="card-text">Kilometerstand: {{ vehicle.mileage }}</p>
-              <p class="card-text">
-                HU / AU: {{ vehicle.nextcheck | formatDate }}
-              </p>
-<div v-if="vehicle.oil.length">
-              Letzter Ölwechsel am {{ last(vehicle.oil).change | formatDate }}.
-              ({{ last(vehicle.oil).type }})
-            </div>
-             </div>
-            <div class="btn-group" role="group" aria-label="Basic example">
-              <button type="button" class="btn btn-primary">
-                <i class="fas fa-wrench"></i>
-              </button>
-              <button type="button" class="btn btn-primary">
-                <i class="fab fa-empire"></i>
-              </button>
-              <button type="button" class="btn btn-primary">
-                <i class="fas fa-oil-can"></i>
-              </button>
-              <router-link
-                class="btn btn-primary"
-                :to="{ name: 'vehicle', params: { id: vehicle.id } }"
-              >
-                <i class="fas fa-ellipsis-v"></i>
-              </router-link>
-            </div>
-          </div>
+    <div>
+      <h1>Fahrzeuge</h1>
+
+      <div class="types">
+        <div
+          v-for="type in types"
+          @click="filter(type)"
+          :key="type"
+          class="type"
+          :class="{ active: selectedType === type }"
+        >
+          {{ type }}
+        </div>
+      </div>
+
+      <div>
+        <div v-if="vehicles.length" class="scroll horizontal">
+          <div class="card dummy"></div>
+
+          <router-link
+            v-for="vehicle in getVehicles"
+            :key="vehicle.id"
+            :to="{ name: 'vehicle', params: { id: vehicle.id } }"
+          >
+            <Card
+              :to="{ name: 'vehicle', params: { id: 'new' } }"
+              :title="vehicle.title"
+              :mileage="vehicle.mileage"
+              :nextcheck="vehicle.nextcheck"
+            />
+          </router-link>
+
+          <div class="card dummy"></div>
         </div>
         <div v-else>
           <p class="no-results">There are currently no posts</p>
         </div>
-       
 
         <router-link
-          class="btn btn-primary btn-lg rounded-pill  w-100 "
-          :to="{ name: 'vehicle', params: { id:'new' } }"
+          class="plus"
+          :to="{ name: 'vehicle', params: { id: 'new' } }"
         >
-          Neues Fahrzeug
+          <svg
+            width="50px"
+            height="50px"
+            xmlns="http://www.w3.org/2000/svg"
+            version="1.1"
+          >
+            <line
+              x1="5"
+              x2="45"
+              y1="25"
+              y2="25"
+             
+              :stroke-width="plus.width"
+              stroke-linecap="round"
+            />
+            <line
+              x1="26"
+              x2="26"
+              y1="5"
+              y2="45"
+               
+              :stroke-width="plus.width"
+              stroke-linecap="round"
+            />
+          </svg>
         </router-link>
       </div>
 
@@ -90,20 +113,35 @@
           </div>
         </div>
       </div>
-
-       
-    </section>
+    </div>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
 import moment from "moment";
+import Card from "@/components/Card";
 
 export default {
-  components: {},
+  components: {
+    Card
+  },
   data() {
     return {
+      plus: {
+        color: "#000000",
+        width: 2
+      },
+      types: ["Pkw", "Krad", "Alle"],
+      selectedType: "Alle",
+      styleVehicle: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "0px",
+        height: "0px"
+      },
+      vehicle: null,
       modal: {
         display: "none"
       },
@@ -125,9 +163,45 @@ export default {
     };
   },
   computed: {
-    ...mapState(["userProfile", "vehicles"])
+    ...mapState(["userProfile", "vehicles"]),
+    getVehicles() {
+      if (this.selectedType != "Alle") {
+        return this.vehicles.filter(item => {
+          return (
+            item.type.toLowerCase().indexOf(this.selectedType.toLowerCase()) >
+            -1
+          );
+        });
+      } else {
+        return this.vehicles;
+      }
+    }
   },
   methods: {
+    filter(type) {
+      this.selectedType = type;
+    },
+    edit(vehicle, event) {
+      const rect = event.target.getBoundingClientRect();
+      console.log(rect.top);
+      this.styleVehicle = {
+        position: "absolute",
+        top: `${rect.top}px`,
+        left: `${rect.left}px`,
+        width: `${rect.width}px`,
+        height: `${rect.height}px`,
+        margin: 0
+      };
+      this.vehicle = vehicle;
+      this.styleVehicle = {
+        position: "absolute",
+        margin: 0,
+        marginTop: `${-rect.top}px`,
+        marginLeft: `${-rect.left}px`,
+        width: `100vw`,
+        height: `100vh`
+      };
+    },
     createVehicle() {
       this.modal.display = "block";
     },
@@ -180,9 +254,30 @@ export default {
       let date = val.toDate();
       return moment(date).format("MM.YYYY");
     }
-  }   
+  }
 };
 </script>
 
 <style lang="scss" scoped>
+.types {
+  display: flex;
+  justify-content: space-between;
+
+  .type {
+    &.active {
+      font-weight: 600;
+      border-bottom: 2px solid red;
+    }
+  }
+}
+.plus {
+  display: flex;
+  justify-content: center;
+  >svg{
+    background-color: #fff;
+    line{
+      stroke:#7c7c7c;
+    }
+  }
+}
 </style>
