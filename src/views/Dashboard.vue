@@ -1,115 +1,90 @@
 <template>
   <div id="dashboard">
-    <transition name="fade">
-      <CommentModal
-        v-if="showCommentModal"
-        :post="selectedPost"
-        @close="toggleCommentModal()"
-      ></CommentModal>
-    </transition>
-    <div>
-      <h1>Fahrzeuge</h1>
+    <h1>Fahrzeuge</h1>
 
-      <div class="types">
-        <div
-          v-for="type in types"
-          @click="filter(type)"
-          :key="type"
-          class="type"
-          :class="{ active: selectedType === type }"
-        >
-          {{ type }}
-        </div>
-      </div>
-
-      <div>
-        <div v-if="vehicles.length" class="scroll horizontal">
-          <div class="card dummy"></div>
-
-          <router-link
-            v-for="vehicle in getVehicles"
-            :key="vehicle.id"
-            :to="{ name: 'vehicle', params: { id: vehicle.id } }"
-          >
-            <Card
-              :to="{ name: 'vehicle', params: { id: 'new' } }"
-              :title="vehicle.title"
-              :mileage="vehicle.mileage"
-              :nextcheck="vehicle.nextcheck"
-            />
-          </router-link>
-
-          <div class="card dummy"></div>
-        </div>
-        <div v-else>
-          <p class="no-results">There are currently no posts</p>
-        </div>
-
-        <router-link
-          class="plus"
-          :to="{ name: 'vehicle', params: { id: 'new' } }"
-        >
-          <svg
-            width="50px"
-            height="50px"
-            xmlns="http://www.w3.org/2000/svg"
-            version="1.1"
-          >
-            <line
-              x1="5"
-              x2="45"
-              y1="25"
-              y2="25"
-             
-              :stroke-width="plus.width"
-              stroke-linecap="round"
-            />
-            <line
-              x1="26"
-              x2="26"
-              y1="5"
-              y2="45"
-               
-              :stroke-width="plus.width"
-              stroke-linecap="round"
-            />
-          </svg>
-        </router-link>
-      </div>
-
+    <div class="types">
       <div
-        class="modal fade show"
-        :style="modal"
-        id="staticBackdrop"
-        data-bs-backdrop="static"
-        tabindex="-1"
+        v-for="type in types"
+        @click="filter(type)"
+        :key="type"
+        class="type"
+        :class="{ active: selectedType === type }"
       >
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Modal title</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div class="modal-body">
-              <p>Modal body text goes here.</p>
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Close
-              </button>
-              <button type="button" class="btn btn-primary">
-                Save changes
-              </button>
-            </div>
+        {{ type }}
+      </div>
+    </div>
+
+    <div v-if="vehicles.length" class="horizontal">
+      <Card
+        v-for="vehicle in getVehicles"
+        :key="vehicle.id"
+        :to="{ name: 'vehicle', params: { id: vehicle.id } }"
+        :title="vehicle.title"
+        :mileage="vehicle.mileage"
+        :nextcheck="vehicle.nextcheck"
+        :image="vehicle.image" />
+    </div>
+
+    <div v-else>
+      <p class="no-results">There are currently no posts</p>
+    </div>
+
+    <router-link class="plus" :to="{ name: 'vehicle', params: { id: 'new' } }">
+      <svg
+        width="50px"
+        height="50px"
+        xmlns="http://www.w3.org/2000/svg"
+        version="1.1"
+      >
+        <line
+          x1="5"
+          x2="45"
+          y1="25"
+          y2="25"
+          :stroke-width="plus.width"
+          stroke-linecap="round"
+        />
+        <line
+          x1="26"
+          x2="26"
+          y1="5"
+          y2="45"
+          :stroke-width="plus.width"
+          stroke-linecap="round"
+        />
+      </svg>
+    </router-link>
+
+    <div
+      class="modal fade show"
+      :style="modal"
+      id="staticBackdrop"
+      data-bs-backdrop="static"
+      tabindex="-1"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>Modal body text goes here.</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button type="button" class="btn btn-primary">Save changes</button>
           </div>
         </div>
       </div>
@@ -121,6 +96,7 @@
 import { mapState } from "vuex";
 import moment from "moment";
 import Card from "@/components/Card";
+ 
 
 export default {
   components: {
@@ -224,15 +200,7 @@ export default {
       }
     },
     async viewPost(post) {
-      // const docs = await commentsCollection
-      //   .where("postId", "==", post.id)
-      //   .get();
-
-      // docs.forEach(doc => {
-      //   let comment = doc.data();
-      //   comment.id = doc.id;
-      //   this.postComments.push(comment);
-      // });
+       
 
       this.fullPost = post;
       this.showPostModal = true;
@@ -273,11 +241,29 @@ export default {
 .plus {
   display: flex;
   justify-content: center;
-  >svg{
+  > svg {
     background-color: #fff;
-    line{
-      stroke:#7c7c7c;
+    line {
+      stroke: #7c7c7c;
     }
   }
+}
+#dashboard {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  box-sizing: content-box;
+
+  .horizontal {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-grow: 1;
+    width: calc(100% + 40px);
+    overflow-x: auto;
+    margin: 0 -20px 0 -20px;
+    
+    scroll-snap-type: x mandatory;
+  }
+
 }
 </style>

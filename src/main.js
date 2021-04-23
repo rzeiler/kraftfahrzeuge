@@ -4,11 +4,12 @@ import router from "./router";
 import store from "./store";
 import { auth } from "./firebase";
 import "./assets/scss/app.scss";
+import './registerServiceWorker'
 
 Vue.config.productionTip = false;
 //Vue.component(myInView);
 
- 
+
 
 // Vue.directive("pan", {
 //   bind: function(el, binding) {

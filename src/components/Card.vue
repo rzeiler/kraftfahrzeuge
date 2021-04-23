@@ -1,7 +1,7 @@
 <template>
-  <div class="card">
+  <router-link class="card" :to="to" v-bind:style="background">
     <div></div>
-    <div class="card-title">
+    <div class="card-title" >
       <b>{{ title }}</b>
     </div>
     <div class="card-title">
@@ -15,8 +15,8 @@
       version="1.1"
     >
       <line
-        x1="5%"
-        x2="95%"
+        x1="1%"
+        x2="99%"
         :y1="y"
         :y2="y"
         stroke="#ffffff44"
@@ -24,7 +24,7 @@
         stroke-linecap="round"
       />
       <line
-        x1="5%"
+        x1="1%"
         :x2="x2"
         :y1="y"
         :y2="y"
@@ -33,7 +33,7 @@
         stroke-linecap="round"
       />
     </svg>
-  </div>
+  </router-link>
 </template>
 
 <script>
@@ -44,7 +44,9 @@ export default {
     title: null,
     imageUrl: null,
     mileage: null,
-    nextcheck: null
+    nextcheck: null,
+    to: null,
+    image: null
   },
   data() {
     return {
@@ -52,12 +54,16 @@ export default {
     };
   },
   computed: {
+    background() {
+      const bi = { 'background-image': `url('${this.image}')` };
+      console.log("background",bi);
+      return bi;
+    },
     x2() {
-      console.log(this.nextcheck);
       let date = moment(this.nextcheck.toDate());
       let curdate = moment(undefined);
       let diff = date.diff(curdate, "days");
-      return `${100 - (diff / 730) * 100 - 5}%`;
+      return `${100 - (diff / 730) * 100 - 1}%`;
     }
   }
 };

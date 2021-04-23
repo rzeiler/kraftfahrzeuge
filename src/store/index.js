@@ -19,6 +19,14 @@ fb.auth.onAuthStateChanged((user) => {
         snapshot.forEach((_doc) => {
           let post = _doc.data();
           post.id = _doc.id;
+          post.image = "../bmw.jpg";
+          fb.vehicleImages
+            .ref(`vehicleImages/${user.uid}/${post.id}`)
+            .getDownloadURL()
+            .then((url) => {
+              post.image = url;
+            });
+
           postsArray.push(post);
           console.log(post);
         });
@@ -34,7 +42,6 @@ const store = new Vuex.Store({
   state: {
     userProfile: {},
     vehicles: [],
-    item: null,
     error: null,
   },
   mutations: {
@@ -55,23 +62,25 @@ const store = new Vuex.Store({
     },
   },
   actions: {
-    async login({ dispatch }, form) {
-      // sign user in
-      const { user } = await fb.auth.signInWithEmailAndPassword(
-        form.email,
-        form.password
-      );
-
-      // fetch user profile and set in state
-      dispatch("fetchUserProfile", user);
+    async login({ dispatch, commit }, form) {
+      fb.auth
+        .signInWithEmailAndPassword(form.email, form.password)
+        .then((user) => {
+          // fetch user profile and set in state
+          dispatch("fetchUserProfile", user);
+        })
+        .catch((err) => {
+          commit("setError", err.message);
+        });
     },
     async removeVehicle({ state, commit }, vehicle) {
       await fb.vehiclesCollection.doc(vehicle.key).delete();
     },
     async signup({ dispatch, commit }, form) {
       // sign user up
-      fb.auth.createUserWithEmailAndPassword(form.email, form.password).then(
-        function(user) {
+      fb.auth
+        .createUserWithEmailAndPassword(form.email, form.password)
+        .then(function(user) {
           // create user object in userCollections
           fb.usersCollection
             .doc(user.uid)
@@ -83,11 +92,10 @@ const store = new Vuex.Store({
               // fetch user profile and set in state
               dispatch("fetchUserProfile", user);
             });
-        },
-        function(err) {
+        })
+        .catch((err) => {
           commit("setError", err.message);
-        }
-      );
+        });
     },
     async fetchUserProfile({ commit }, user) {
       // fetch user profile
@@ -101,10 +109,6 @@ const store = new Vuex.Store({
         router.push("/");
       }
     },
-
-
-
-
     async logout({ commit }) {
       // log user out
       await fb.auth.signOut();
@@ -116,16 +120,11 @@ const store = new Vuex.Store({
       router.push("/login");
     },
     async getVehicle({ state, commit }, key) {
-console.log("getVehicle");
- 
-  
-
-      
-       commit("setVehicle", state.vehicles.find((v) => v.id === key));
-
+      commit(
+        "setVehicle",
+        state.vehicles.find((v) => v.id === key)
+      );
     },
-
-
     async createVehicle({ state, commit }, vehicle) {
       // create in firebase
       await fb.vehiclesCollection.add({
@@ -135,7 +134,7 @@ console.log("getVehicle");
         nextcheck: vehicle.nextcheck,
         uid: fb.auth.currentUser.uid,
         userName: state.userProfile.name,
-        oil:[]
+        oil: [],
       });
     },
     async updateVehicle({ state, commit }, vehicle) {
@@ -146,7 +145,7 @@ console.log("getVehicle");
         nextcheck: vehicle.nextcheck,
         uid: fb.auth.currentUser.uid,
         userName: state.userProfile.name,
-        oil:[]
+        oil: [],
       });
     },
     async updateProfile({ dispatch }, user) {

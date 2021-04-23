@@ -10,12 +10,12 @@
 
       <form @submit.prevent>
         <label for="name">Name</label>
-        <input v-model.trim="name" type="text" :placeholder="userProfile.name" id="name" />
+        <input v-model.trim="name" type="text" class="form-control" :placeholder="userProfile.name" id="name" />
 
         <label for="title">Job Title</label>
-        <input v-model.trim="title" type="text" :placeholder="userProfile.title" id="title" />
+        <input v-model.trim="title" type="text" class="form-control" :placeholder="userProfile.title" id="title" />
 
-        <button @click="updateProfile()" class="button">Update Profile</button>
+        <input @click="updateProfile()" type="button"  value="Speichern" />
       </form>
     </div>
   </section>

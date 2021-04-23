@@ -1,35 +1,31 @@
 <template>
-  <div class="d-flex justify-content-between p-2">
-    <div class="dropdown mt-2">
-      <button
-        class="btn btn-flat"
-        type="button"
-        id="dropdownMenuButton1"
-        data-bs-toggle="dropdown"
-      >
-        <i class="fas fa-bars"></i>
-      </button>
-      <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-        <li>
-          <router-link class="dropdown-item" to="/">Liste</router-link>
-        </li>
-        <li>
-          <router-link class="dropdown-item" to="/settings"
-            >Einstellungen</router-link
-          >
-        </li>
-        <li>
-          <a class="dropdown-item" @click="logout()" href="#">Abmelden</a>
-        </li>
-      </ul>
+  <div>
+    <svg viewBox="0 0 100 80" width="40" v-on:click="menu()" height="40">
+      <rect y="30" width="80" height="10" rx="8"></rect>
+      <rect y="60" width="100" height="10" rx="8"></rect>
+    </svg>
+    <div v-if="showMenu" class="menu">
+      <router-link class="dropdown-item" to="/">Fahrzeuge</router-link>
+
+      <router-link class="dropdown-item" to="/settings">Einstellungen</router-link>
+
+      <a class="dropdown-item" v-on:click="logout()" href="#">Abmelden</a>
     </div>
-    <h1 class="display-1 pe-2"></h1>
   </div>
 </template>
 
 <script>
 export default {
+  data() {
+    return {
+      showMenu: false
+    };
+  },
   methods: {
+    menu() {
+      this.showMenu = !this.showMenu;
+      document.body.style.overflow = (this.showMenu ? "hidden":"unset");
+    },
     logout() {
       this.$store.dispatch("logout");
     }

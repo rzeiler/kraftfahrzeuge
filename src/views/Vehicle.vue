@@ -1,10 +1,25 @@
 <template>
-  <div v-if="vehicle">
+  <div v-if="vehicle" id="vehicle">
     <form v-if="!showModal">
+      <div class="image" v-on:click="changeImage" v-bind:style="background">
+        <svg x="0px" y="0px" viewBox="0 0 117.74 122.88">
+          <g>
+            <path
+              d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"
+            />
+          </g>
+        </svg>
+        <input
+          type="file"
+          ref="image"
+          accept="image/*"
+          v-on:change="previewFile"
+        />
+      </div>
+
       <label for="title" class="form-label">Marke</label>
       <input
-        type="title"
-        class="form-control"
+        type="text"
         id="title"
         placeholder="Skoda..."
         v-model.trim="vehicle.title"
@@ -13,7 +28,6 @@
       <label for="mileage" class="form-label">Kilometerstand</label>
       <input
         type="number"
-        class="form-control"
         id="mileage"
         placeholder="10312..."
         v-model.trim="vehicle.mileage"
@@ -22,12 +36,12 @@
       <label for="nextcheck" class="form-label">HU / AU Termin</label>
       <input
         type="Date"
-        class="form-control"
         id="nextcheck"
         defaultValue="01.01.2020"
         placeholder="12.2.2022..."
         v-model.trim="vehicle.nextcheck"
       />
+      <div class="spacer"></div>
 
       <button
         v-if="vehicle.uid"
@@ -50,6 +64,7 @@
         Löschen
       </button>
     </form>
+
     <div
       v-if="showModal"
       class="modal fade"
@@ -78,17 +93,15 @@
 </template>
 
 <script>
-import { vehiclesCollection } from "@/firebase";
-import { mapState, mapGetters } from "vuex";
-
+import { vehicleImages, auth } from "@/firebase";
 import moment from "moment";
-import Router from "vue-router";
 
 const defaultDate = {
   title: null,
   mileage: null,
   nextcheck: null,
   uid: null,
+  image: null,
   oil: []
 };
 
@@ -113,6 +126,7 @@ export default {
             mileage: data.mileage,
             nextcheck: moment(date).format("YYYY-MM-DD"),
             uid: data.uid,
+            image: data.image,
             oil: []
           };
         } else {
@@ -121,9 +135,16 @@ export default {
       } else {
         return defaultDate;
       }
-    }
+    },
+    background() {
+      const bi = { 'background-image': `url('${this.vehicle.image}')` };
+      return bi;
+    },
   },
   methods: {
+    changeImage() {
+      this.$refs.image.click();
+    },
     confirmDelete() {
       this.showModal = !this.showModal;
     },
@@ -166,6 +187,37 @@ export default {
             console.log(err);
           }
         );
+    },
+    previewFile(ev) {
+      
+      const file = ev.target.files[0];
+
+      const storageRef = vehicleImages.ref(`vehicleImages/${auth.currentUser.uid}/${this.$route.params.id}`).put(file);
+      storageRef.on(
+        `state_changed`,
+        snapshot => {
+          this.uploadValue =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        error => {
+          console.log(error.message);
+        },
+        () => {
+          
+          storageRef.snapshot.ref.getDownloadURL().then(url => {
+            console.log( "url",url);
+          });
+        }
+      );
+      
+    },
+    createImage(e) {
+      console.log(e);
+    },
+    fileReaderLoaded(arg) {
+      const src_image = new Image();
+      src_image.onload = function() {};
+      src_image.src = this.result;
     }
   },
   mounted() {},
@@ -185,13 +237,43 @@ export default {
 };
 </script>
 
-<style lang="sass">
-.bg
-  background-color: unset !important
-  color: unset !important
-</style>
+ 
 
 <style lang="scss" scoped>
+#vehicle {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  box-sizing: content-box;
+
+  form {
+    flex-grow: 1;
+    padding: 20px;
+    .image {
+      display: flex;
+      min-height: 30%;
+      background-image: url("../assets/bmw.jpg");
+      background-size: cover;
+      background-repeat: no-repeat;
+      color: #fff;
+      justify-content: center;
+      align-items: center;
+      svg {
+        height: 50px;
+        path {
+          fill: #fff;
+        }
+      }
+      input {
+        display: none;
+      }
+    }
+    .spacer {
+      flex-grow: 1;
+    }
+  }
+}
+
 button {
   color: #fff;
   background-color: #0d6efd;
