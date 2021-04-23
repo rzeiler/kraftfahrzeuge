@@ -1,6 +1,6 @@
 <template>
   <div id="app" class="container">
-    <SiteNav v-if="showNav"></SiteNav>
+ 
     <transition :duration="800" name="slide">
       <router-view />
     </transition>
@@ -15,17 +15,15 @@
 
 <script>
 import { mapState } from "vuex";
-import SiteNav from "@/components/SiteNav";
+
 
 export default {
   components: {
-    SiteNav
+    
   },
   computed: {
     ...mapState(["userProfile", "error"]),
-    showNav() {
-      return Object.keys(this.userProfile).length > 1;
-    }
+   
   },
   methods: {
     close() {

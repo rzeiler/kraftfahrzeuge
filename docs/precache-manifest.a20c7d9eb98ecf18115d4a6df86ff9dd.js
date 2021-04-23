@@ -1,7 +1,7 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "4c6aa1d401149fa3e5c7",
-    "url": "/kraftfahrzeuge/css/app.adfc616e.css"
+    "revision": "d2bd829b4ef0346ed007",
+    "url": "/kraftfahrzeuge/css/app.f45f7aa4.css"
   },
   {
     "revision": "edada5e009b6a14a0710",
@@ -16,12 +16,12 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/kraftfahrzeuge/img/bmw.3feb48a0.jpg"
   },
   {
-    "revision": "c82f83c22ae03d00dd3d4a6b02394cde",
+    "revision": "c00ee8ba0cfa5920e17ecef1a1c078d6",
     "url": "/kraftfahrzeuge/index.html"
   },
   {
-    "revision": "4c6aa1d401149fa3e5c7",
-    "url": "/kraftfahrzeuge/js/app.9dbc9228.js"
+    "revision": "d2bd829b4ef0346ed007",
+    "url": "/kraftfahrzeuge/js/app.b2c356fd.js"
   },
   {
     "revision": "ba055d8c3a68b6b41bb2",

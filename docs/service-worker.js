@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/kraftfahrzeuge/precache-manifest.8a1ff2d51a6f36b396eafe2635245d69.js"
+  "/kraftfahrzeuge/precache-manifest.a20c7d9eb98ecf18115d4a6df86ff9dd.js"
 );
 
 workbox.core.setCacheNameDetails({prefix: "kraftfahrzeuge"});

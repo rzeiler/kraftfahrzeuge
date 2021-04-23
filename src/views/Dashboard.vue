@@ -1,5 +1,6 @@
 <template>
   <div id="dashboard">
+    <SiteNav v-if="showNav"></SiteNav>
     <h1>Fahrzeuge</h1>
 
     <div class="types">
@@ -22,7 +23,8 @@
         :title="vehicle.title"
         :mileage="vehicle.mileage"
         :nextcheck="vehicle.nextcheck"
-        :image="vehicle.image" />
+        :image="vehicle.image"
+      />
     </div>
 
     <div v-else>
@@ -96,11 +98,12 @@
 import { mapState } from "vuex";
 import moment from "moment";
 import Card from "@/components/Card";
- 
+import SiteNav from "@/components/SiteNav";
 
 export default {
   components: {
-    Card
+    Card,
+    SiteNav
   },
   data() {
     return {
@@ -140,6 +143,9 @@ export default {
   },
   computed: {
     ...mapState(["userProfile", "vehicles"]),
+    showNav() {
+      return Object.keys(this.userProfile).length > 1;
+    },
     getVehicles() {
       if (this.selectedType != "Alle") {
         return this.vehicles.filter(item => {
@@ -200,8 +206,6 @@ export default {
       }
     },
     async viewPost(post) {
-       
-
       this.fullPost = post;
       this.showPostModal = true;
     },
@@ -261,9 +265,8 @@ export default {
     width: calc(100% + 40px);
     overflow-x: auto;
     margin: 0 -20px 0 -20px;
-    
+
     scroll-snap-type: x mandatory;
   }
-
 }
 </style>

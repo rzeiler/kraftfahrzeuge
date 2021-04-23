@@ -1,6 +1,7 @@
 <template>
   <div v-if="vehicle" id="vehicle">
     <form v-if="!showModal">
+      <router-link class="close" to="/">&#x2715;</router-link>
       <div class="image" v-on:click="changeImage" v-bind:style="background">
         <svg x="0px" y="0px" viewBox="0 0 117.74 122.88">
           <g>
@@ -121,6 +122,14 @@ export default {
         );
         if (data) {
           const date = new Date(data.nextcheck.seconds * 1000);
+
+          const body = document.body;
+          body.style.backgroundImage = `url(${data.image})`;
+          body.style.backgroundRepeat = "no-repeat";
+          body.style.backgroundSize = "200% 200%";
+          body.style.backgroundPosition = "center";
+          body.style.backdropFilter = "blur(40px)";
+
           return {
             title: data.title,
             mileage: data.mileage,
@@ -137,9 +146,9 @@ export default {
       }
     },
     background() {
-      const bi = { 'background-image': `url('${this.vehicle.image}')` };
+      const bi = { "background-image": `url('${this.vehicle.image}')` };
       return bi;
-    },
+    }
   },
   methods: {
     changeImage() {
@@ -189,10 +198,11 @@ export default {
         );
     },
     previewFile(ev) {
-      
       const file = ev.target.files[0];
 
-      const storageRef = vehicleImages.ref(`vehicleImages/${auth.currentUser.uid}/${this.$route.params.id}`).put(file);
+      const storageRef = vehicleImages
+        .ref(`vehicleImages/${auth.currentUser.uid}/${this.$route.params.id}`)
+        .put(file);
       storageRef.on(
         `state_changed`,
         snapshot => {
@@ -203,13 +213,11 @@ export default {
           console.log(error.message);
         },
         () => {
-          
           storageRef.snapshot.ref.getDownloadURL().then(url => {
-            console.log( "url",url);
+            console.log("url", url);
           });
         }
       );
-      
     },
     createImage(e) {
       console.log(e);
@@ -221,6 +229,11 @@ export default {
     }
   },
   mounted() {},
+  destroyed() {
+    const body = document.body;
+    body.style.backgroundImage = "unset";
+    body.style.backdropFilter = "unset";
+  },
   filters: {
     json(val) {
       return JSON.stringify(val);
@@ -245,19 +258,31 @@ export default {
   flex-direction: column;
   flex-grow: 1;
   box-sizing: content-box;
+  background-color: rgba(0, 0, 0, 0.3);
+  margin: 0 -20px 0 -20px;
 
   form {
     flex-grow: 1;
     padding: 20px;
+    color: #fff;
+    input {
+      background-color: transparent;
+        color: #fff;
+        border-color: rgba(255,255,255,.3);
+    }
+
     .image {
       display: flex;
       min-height: 30%;
       background-image: url("../assets/bmw.jpg");
       background-size: cover;
+      background-position: center;
       background-repeat: no-repeat;
       color: #fff;
       justify-content: center;
       align-items: center;
+      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+      border-radius: 0.5rem;
       svg {
         height: 50px;
         path {
@@ -293,5 +318,10 @@ button {
   padding: 0.375rem 0.75rem;
   font-size: 1rem;
   border-radius: 0.25rem;
+}
+
+.close {
+  padding: 20px;
+  color: black;
 }
 </style>
