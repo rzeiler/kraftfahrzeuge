@@ -3,6 +3,14 @@
     <transition :duration="800" name="slide">
       <router-view />
     </transition>
+
+
+<div v-if="updateExists">
+  Eine neue Version ist verfügbar!
+ call refreshApp()
+</div>
+
+
     <div class="toast" v-if="error">
       <div>
         {{ error }}
@@ -14,12 +22,13 @@
 
 <script>
 import { mapState } from "vuex";
-
+import update from "./mixins/update";
 export default {
   components: {},
   computed: {
     ...mapState(["userProfile", "error"])
   },
+  mixins: [update],
   methods: {
     close() {
       this.$store.commit("setError", "");
