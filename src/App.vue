@@ -1,6 +1,5 @@
 <template>
   <div id="app" class="container">
- 
     <transition :duration="800" name="slide">
       <router-view />
     </transition>
@@ -16,18 +15,14 @@
 <script>
 import { mapState } from "vuex";
 
-
 export default {
-  components: {
-    
-  },
+  components: {},
   computed: {
-    ...mapState(["userProfile", "error"]),
-   
+    ...mapState(["userProfile", "error"])
   },
   methods: {
     close() {
-       this.$store.commit("setError", "");
+      this.$store.commit("setError", "");
     }
   }
 };
@@ -43,12 +38,13 @@ export default {
   position: absolute;
 }
 
-.container {
-  max-width: 800px;
-  padding: 0 20px 0 20px;
-  margin: 0 auto 0 auto;
-  display: flex;
-  flex-direction: column;
+#app {
+  width: 100%;
   height: 100%;
+  
+  
+
 }
+
+
 </style>

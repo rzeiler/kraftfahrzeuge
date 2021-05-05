@@ -1,148 +1,60 @@
 <template>
   <div id="dashboard">
-    <SiteNav v-if="showNav"></SiteNav>
-    <h1>Fahrzeuge</h1>
+    <div class="container">
+      <SiteNav v-on:add="onAdd"></SiteNav>
+      <h1>Fahrzeuge</h1>
+      <m-tabs
+        :selectable="true"
+        v-on:selected="onSelected"
+        :items="itmes"
+      ></m-tabs>
+    </div>
+    <m-list
+      v-if="vehicles.length"
+      @clicked="onClicked"
+      :data="getVehicles"
+    ></m-list>
 
-    <div class="types">
-      <div
-        v-for="type in types"
-        @click="filter(type)"
-        :key="type"
-        class="type"
-        :class="{ active: selectedType === type }"
-      >
-        {{ type }}
-      </div>
+    <p v-else class="no-results">There are currently no posts</p>
+    <div class="container">
+      <m-tabs
+        v-if="events.length"
+        v-on:selected="onActionSelected"
+        :items="events"
+        class="small"
+      ></m-tabs>
     </div>
 
-    <div v-if="vehicles.length" class="horizontal">
-      <Card
-        v-for="vehicle in getVehicles"
-        :key="vehicle.id"
-        :to="{ name: 'vehicle', params: { id: vehicle.id } }"
-        :title="vehicle.title"
-        :mileage="vehicle.mileage"
-        :nextcheck="vehicle.nextcheck"
-        :image="vehicle.image"
-      />
-    </div>
-
-    <div v-else>
-      <p class="no-results">There are currently no posts</p>
-    </div>
-
-    <router-link class="plus" :to="{ name: 'vehicle', params: { id: 'new' } }">
-      <svg
-        width="50px"
-        height="50px"
-        xmlns="http://www.w3.org/2000/svg"
-        version="1.1"
-      >
-        <line
-          x1="5"
-          x2="45"
-          y1="25"
-          y2="25"
-          :stroke-width="plus.width"
-          stroke-linecap="round"
-        />
-        <line
-          x1="26"
-          x2="26"
-          y1="5"
-          y2="45"
-          :stroke-width="plus.width"
-          stroke-linecap="round"
-        />
-      </svg>
-    </router-link>
-
-    <div
-      class="modal fade show"
-      :style="modal"
-      id="staticBackdrop"
-      data-bs-backdrop="static"
-      tabindex="-1"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Modal title</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <p>Modal body text goes here.</p>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
-            <button type="button" class="btn btn-primary">Save changes</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Select :show="vehicleList.length > 0" :items="vehicleList" title="Fahrzeug wählen" @close="vehicleList = []" @select="onMenuItemSelected" >
+    
+    </Select>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
 import moment from "moment";
-import Card from "@/components/Card";
+import Select from "@/components/Select";
 import SiteNav from "@/components/SiteNav";
 
 export default {
   components: {
-    Card,
-    SiteNav
+    SiteNav,
+    Select
   },
   data() {
     return {
-      plus: {
-        color: "#000000",
-        width: 2
-      },
-      types: ["Pkw", "Krad", "Alle"],
-      selectedType: "Alle",
-      styleVehicle: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "0px",
-        height: "0px"
-      },
-      vehicle: null,
-      modal: {
-        display: "none"
-      },
-      post: {
-        title: "",
-        milage: 0,
-        nextcheck: null,
-        oil: {
-          change: null,
-          type: ""
-        }
-      },
-      swipeActions: 0,
-      showCommentModal: false,
-      selectedPost: {},
-      showPostModal: false,
-      fullPost: {},
-      postComments: []
+      itmes: [
+        { value: "Pkw", title: "Pkw", selected: false },
+        { value: "Krad", title: "Krad", selected: false },
+        { value: "", title: "Alle", selected: true }
+      ],
+      vehicleList: [],
+      selectedType: "Alle"
     };
   },
   computed: {
-    ...mapState(["userProfile", "vehicles"]),
+    ...mapState(["userProfile", "events", "vehicles"]),
     showNav() {
       return Object.keys(this.userProfile).length > 1;
     },
@@ -150,8 +62,9 @@ export default {
       if (this.selectedType != "Alle") {
         return this.vehicles.filter(item => {
           return (
-            item.type.toLowerCase().indexOf(this.selectedType.toLowerCase()) >
-            -1
+            item.category
+              .toLowerCase()
+              .indexOf(this.selectedType.toLowerCase()) > -1
           );
         });
       } else {
@@ -160,8 +73,30 @@ export default {
     }
   },
   methods: {
-    filter(type) {
-      this.selectedType = type;
+    onClicked(kex) {
+      this.$router.push(`/vehicle/${kex}`);
+    },
+    onAdd() {
+      this.$router.push("/vehicle/new");
+    },
+    onMenuItemSelected(params) {
+      this.vehicleList = [];
+      this.$router.push(`/event/${params.id}/${params.event}`);
+    },
+    onSelected(item) {
+      this.selectedType = item.value;
+    },
+    onMenuClosed() {
+      this.vehicleList = [];
+    },
+    onActionSelected(item) {
+      this.getVehicles.forEach((value, index) => {
+        this.vehicleList.push({
+          id: value.id,
+          title: value.title,
+          params: { id: value.id, event: item.id }
+        });
+      });
     },
     edit(vehicle, event) {
       const rect = event.target.getBoundingClientRect();
@@ -191,10 +126,7 @@ export default {
     last(arr) {
       return arr[arr.length - 1];
     },
-    createPost() {
-      // this.$store.dispatch("createPost", { content: this.post.content });
-      this.post.content = "";
-    },
+
     toggleCommentModal(post) {
       this.showCommentModal = !this.showCommentModal;
 
@@ -230,43 +162,23 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.types {
-  display: flex;
-  justify-content: space-between;
-
-  .type {
-    &.active {
-      font-weight: 600;
-      border-bottom: 2px solid red;
-    }
-  }
-}
-.plus {
-  display: flex;
-  justify-content: center;
-  > svg {
-    background-color: #fff;
-    line {
-      stroke: #7c7c7c;
-    }
-  }
-}
+<style lang="scss" >
 #dashboard {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
   box-sizing: content-box;
-
-  .horizontal {
-    display: flex;
-    flex-wrap: nowrap;
-    flex-grow: 1;
-    width: calc(100% + 40px);
-    overflow-x: auto;
-    margin: 0 -20px 0 -20px;
-
-    scroll-snap-type: x mandatory;
+}
+.tab-group.small {
+  justify-content: space-between;
+  .tab-item {
+    width: 50px;
+    height: 50px;
+    background-color: #e0e0e0;
+    margin: 10px;
+    flex-grow: unset;
+    border-radius: 10px;
+    box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.3);
   }
 }
 </style>

@@ -4,11 +4,25 @@ import router from "./router";
 import store from "./store";
 import { auth } from "./firebase";
 import "./assets/scss/app.scss";
-import './registerServiceWorker'
+import './registerServiceWorker';
+ 
 
 Vue.config.productionTip = false;
 //Vue.component(myInView);
 
+import Icon from '@/components/Icon';
+import Tabs from '@/components/Tabs';
+import Bar from '@/components/Bar';
+import List from '@/components/List';
+import Menu from '@/components/Menu';
+import SiteHead from '@/components/SiteHead';
+
+Vue.component('m-page-head', SiteHead);
+Vue.component('m-menu', Menu);
+Vue.component('m-icon', Icon);
+Vue.component('m-tabs', Tabs);
+Vue.component('m-bar', Bar);
+Vue.component('m-list', List);
 
 
 // Vue.directive("pan", {

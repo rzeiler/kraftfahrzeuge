@@ -1,38 +1,13 @@
 <template>
   <router-link class="card" :to="to" v-bind:style="background">
     <div></div>
-    <div class="card-title" >
+    <div class="card-title">
       <b>{{ title }}</b>
     </div>
     <div class="card-title">
       <b>{{ mileage }}</b> Kilometer
     </div>
-
-    <svg
-      width="100%"
-      height="20"
-      xmlns="http://www.w3.org/2000/svg"
-      version="1.1"
-    >
-      <line
-        x1="1%"
-        x2="99%"
-        :y1="y"
-        :y2="y"
-        stroke="#ffffff44"
-        stroke-width="10"
-        stroke-linecap="round"
-      />
-      <line
-        x1="1%"
-        :x2="x2"
-        :y1="y"
-        :y2="y"
-        stroke="#ff0000aa"
-        stroke-width="10"
-        stroke-linecap="round"
-      />
-    </svg>
+    <m-bar :width="width"></m-bar>
   </router-link>
 </template>
 
@@ -55,11 +30,11 @@ export default {
   },
   computed: {
     background() {
-      const bi = { 'background-image': `url('${this.image}')` };
-      console.log("background",bi);
+      const bi = { "background-image": `url('${this.image}')` };
+      console.log("background", bi);
       return bi;
     },
-    x2() {
+    width() {
       let date = moment(this.nextcheck.toDate());
       let curdate = moment(undefined);
       let diff = date.diff(curdate, "days");
@@ -69,5 +44,24 @@ export default {
 };
 </script>
 
- 
+<style lang="scss" scoped>
+.card {
+  display: block;
+  
+  background-size: cover;
+  background-repeat: no-repeat;
+  
+  width: 200px;
+  height: 200px;
+   
+  border-radius: 20px;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0px 5px 30px rgba(0, 0, 0, 0.8);
+  //margin: 5%;
+  color: #fff;
+  //padding: 5%;
+}
+</style>
+
+
 

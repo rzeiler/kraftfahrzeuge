@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Dashboard from '../views/Dashboard.vue'
 import Vehicle from '../views/Vehicle.vue'
+import Event from '../views/Event.vue'
 import { auth } from '../firebase'
 
 Vue.use(VueRouter)
@@ -19,6 +20,14 @@ const routes = [
     path: '/vehicle/:id',
     name: 'vehicle',
     component: Vehicle,
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: '/event/:id/:event',
+    name: 'event',
+    component: Event,
     meta: {
       requiresAuth: true
     }

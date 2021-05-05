@@ -8,6 +8,18 @@ Vue.use(Vuex);
 fb.auth.onAuthStateChanged((user) => {
   if (user) {
     // realtime firebase
+
+    fb.eventCollection.onSnapshot((snapshot) => {
+      let events = [];
+      snapshot.forEach((doc) => {
+        let event = doc.data();
+        event.id = doc.id;
+        event.selected = false;
+        events.push(event);
+      });
+      store.commit("setEvents", events);
+    });
+
     fb.vehiclesCollection
       .orderBy("createdOn", "desc")
       .where("uid", "==", user.uid)
@@ -19,7 +31,7 @@ fb.auth.onAuthStateChanged((user) => {
         snapshot.forEach((_doc) => {
           let post = _doc.data();
           post.id = _doc.id;
-          post.image = "../bmw.jpg";
+          post.image = null;
           fb.vehicleImages
             .ref(`vehicleImages/${user.uid}/${post.id}`)
             .getDownloadURL()
@@ -28,7 +40,6 @@ fb.auth.onAuthStateChanged((user) => {
             });
 
           postsArray.push(post);
-          console.log(post);
         });
 
         store.commit("setPosts", postsArray);
@@ -43,10 +54,14 @@ const store = new Vuex.Store({
     userProfile: {},
     vehicles: [],
     error: null,
+    events: [],
   },
   mutations: {
     setError(state, val) {
       state.error = val;
+    },
+    setEvents(state, val) {
+      state.events = val;
     },
     setUserProfile(state, val) {
       state.userProfile = val;

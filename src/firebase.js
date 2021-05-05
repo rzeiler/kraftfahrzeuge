@@ -11,16 +11,10 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 const vehicleImages = firebase.storage();
 
-// storage
-//   .ref("vehicleImages/bmw.jpg")
-//   .getDownloadURL()
-//   .then((url) => {
-//     console.log("img",url);
-//   });
-
 // collection references
 const usersCollection = db.collection("users");
 const vehiclesCollection = db.collection("vehicles");
+const eventCollection = db.collection("vehicle-events");
 
 // export utils/refs
-export { db, auth, usersCollection, vehiclesCollection, vehicleImages};
+export { db, auth, usersCollection, vehiclesCollection, vehicleImages,eventCollection};

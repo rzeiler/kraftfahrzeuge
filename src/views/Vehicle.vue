@@ -1,15 +1,13 @@
 <template>
-  <div v-if="vehicle" id="vehicle">
-    <form v-if="!showModal">
-      <router-link class="close" to="/">&#x2715;</router-link>
+  <div v-if="vehicle" id="vehicle" class="d-flex flex-column vh-100">
+    <m-page-head :title="pageHeadTitle" @close="onCloseClick">
+      <m-icon name="delete" v-if="vehicle.uid" v-on:click.native="confirmDelete" />
+      <m-icon name="done" :disable="hasChange" v-if="vehicle.uid" v-on:click.native="update" />
+      <m-icon name="done" :disable="hasChange" v-else v-on:click.native="create" />
+    </m-page-head>
+
+    <form class="d-flex flex-column p-2 h-100">
       <div class="image" v-on:click="changeImage" v-bind:style="background">
-        <svg x="0px" y="0px" viewBox="0 0 117.74 122.88">
-          <g>
-            <path
-              d="M94.62,2c-1.46-1.36-3.14-2.09-5.02-1.99c-1.88,0-3.56,0.73-4.92,2.2L73.59,13.72l31.07,30.03l11.19-11.72 c1.36-1.36,1.88-3.14,1.88-5.02s-0.73-3.66-2.09-4.92L94.62,2L94.62,2L94.62,2z M41.44,109.58c-4.08,1.36-8.26,2.62-12.35,3.98 c-4.08,1.36-8.16,2.72-12.35,4.08c-9.73,3.14-15.07,4.92-16.22,5.23c-1.15,0.31-0.42-4.18,1.99-13.6l7.74-29.61l0.64-0.66 l30.56,30.56L41.44,109.58L41.44,109.58L41.44,109.58z M22.2,67.25l42.99-44.82l31.07,29.92L52.75,97.8L22.2,67.25L22.2,67.25z"
-            />
-          </g>
-        </svg>
         <input
           type="file"
           ref="image"
@@ -20,81 +18,66 @@
 
       <label for="title" class="form-label">Marke</label>
       <input
+        class="form-control"
         type="text"
         id="title"
         placeholder="Skoda..."
-        v-model.trim="vehicle.title"
+        v-model="vehicle.title"
+        @input="updateValue(vehicle)"
+        @keyup="updateValue(this)"
       />
+
+
+
 
       <label for="mileage" class="form-label">Kilometerstand</label>
       <input
+        class="form-control"
         type="number"
         id="mileage"
         placeholder="10312..."
         v-model.trim="vehicle.mileage"
+        @input="updateValue(vehicle)"
       />
 
       <label for="nextcheck" class="form-label">HU / AU Termin</label>
       <input
+        class="form-control"
         type="Date"
         id="nextcheck"
         defaultValue="01.01.2020"
         placeholder="12.2.2022..."
         v-model.trim="vehicle.nextcheck"
+        @input="updateValue(vehicle)"
       />
-      <div class="spacer"></div>
+      <div class="flex-fill"></div>
 
-      <button
-        v-if="vehicle.uid"
-        type="button"
-        @click="update()"
-        class="btn btn-success"
-      >
-        Ändern
-      </button>
-      <button v-else type="button" @click="create()" class="btn btn-success">
-        Hinzufügen
-      </button>
-
-      <button
-        v-if="vehicle.uid"
-        v-on:click="confirmDelete"
-        type="button"
-        class="btn btn-primary"
-      >
-        Löschen
-      </button>
+       
     </form>
 
-    <div
-      v-if="showModal"
-      class="modal fade"
-      id="staticBackdrop"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1"
-      aria-labelledby="staticBackdropLabel"
-      aria-hidden="true"
-    >
-      <h1>Achtung</h1>
-      <h2>Soll das Fahrzeug wirklich gelöscht werden?</h2>
-
-      <button
-        type="button"
-        class="btn btn-secondary"
-        v-on:click="confirmDelete"
-      >
-        Abbrechen
-      </button>
-      <button type="button" class="btn btn-primary" @click="remove()">
-        Löschen
-      </button>
-    </div>
+    <!-- Modal -->
+    <Modal :show="showModal">
+      <template v-slot:title>
+        <h5 class="modal-title">Achtung</h5>
+        <m-icon
+          name="close"
+          class="btn-close"
+          v-on:click.native="showModal = false"
+        />
+      </template>
+      Soll das Fahrzeug wirklich gelöscht werden?
+      <template v-slot:footer>
+        <button type="button" class="btn btn-danger" @click="remove()">
+          Löschen
+        </button>
+      </template>
+    </Modal>
   </div>
 </template>
 
 <script>
 import { vehicleImages, auth } from "@/firebase";
+import Modal from "@/components/Modal";
 import moment from "moment";
 
 const defaultDate = {
@@ -107,28 +90,27 @@ const defaultDate = {
 };
 
 export default {
-  components: {},
+  components: { Modal },
   data() {
     return {
-      showModal: false
+      event: null,
+      pageHeadTitle: "Fahrzeug anlegen",
+      showModal: false,
+      hasChange:true
     };
   },
   computed: {
     vehicle() {
       const id = this.$route.params.id;
       if (id != "new") {
+        this.$nextTick(() => {
+          this.pageHeadTitle = "Fahrzeug bearbeiten";
+        });
         const data = this.$store.state.vehicles.find(
           v => v.id === this.$route.params.id
         );
         if (data) {
           const date = new Date(data.nextcheck.seconds * 1000);
-
-          const body = document.body;
-          body.style.backgroundImage = `url(${data.image})`;
-          body.style.backgroundRepeat = "no-repeat";
-          body.style.backgroundSize = "200% 200%";
-          body.style.backgroundPosition = "center";
-          body.style.backdropFilter = "blur(40px)";
 
           return {
             title: data.title,
@@ -150,12 +132,23 @@ export default {
       return bi;
     }
   },
+
   methods: {
+    updateValue(e) {
+       
+
+      this.hasChange = false;
+      console.log("updateValue", e);
+    },
+    onCloseClick() {
+      this.$router.push({ path: "/" });
+    },
     changeImage() {
       this.$refs.image.click();
     },
     confirmDelete() {
-      this.showModal = !this.showModal;
+      this.showModal = true;
+      console.log("this.showModal", this.showModal);
     },
     remove() {
       const self = this;
@@ -164,6 +157,7 @@ export default {
           key: this.$route.params.id
         })
         .then(function() {
+          self.modal.hide();
           self.$router.push({ path: "/" });
         });
     },
@@ -228,7 +222,11 @@ export default {
       src_image.src = this.result;
     }
   },
-  mounted() {},
+  mounted() {
+    if (this.$route.params.event) {
+      this.event = this.$route.params.event;
+    }
+  },
   destroyed() {
     const body = document.body;
     body.style.backgroundImage = "unset";
@@ -253,75 +251,9 @@ export default {
  
 
 <style lang="scss" scoped>
-#vehicle {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  box-sizing: content-box;
-  background-color: rgba(0, 0, 0, 0.3);
-  margin: 0 -20px 0 -20px;
-
-  form {
-    flex-grow: 1;
-    padding: 20px;
-    color: #fff;
-    input {
-      background-color: transparent;
-        color: #fff;
-        border-color: rgba(255,255,255,.3);
-    }
-
-    .image {
-      display: flex;
-      min-height: 30%;
-      background-image: url("../assets/bmw.jpg");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      color: #fff;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
-      border-radius: 0.5rem;
-      svg {
-        height: 50px;
-        path {
-          fill: #fff;
-        }
-      }
-      input {
-        display: none;
-      }
-    }
-    .spacer {
-      flex-grow: 1;
-    }
+.nav {
+  div {
+    border-right: 1px solid red;
   }
-}
-
-button {
-  color: #fff;
-  background-color: #0d6efd;
-  border: 1px solid #0d6efd;
-  display: inline-block;
-  font-weight: 400;
-  line-height: 1.5;
-
-  text-align: center;
-  text-decoration: none;
-  vertical-align: middle;
-  cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-
-  padding: 0.375rem 0.75rem;
-  font-size: 1rem;
-  border-radius: 0.25rem;
-}
-
-.close {
-  padding: 20px;
-  color: black;
 }
 </style>
