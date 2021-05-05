@@ -1,5 +1,23 @@
 <template>
-  <div>
+  <b-navbar>
+    <template #start>
+      <b-navbar-item tag="div">
+        <b-icon icon="menu" />
+      </b-navbar-item>
+      <b-navbar-item tag="div">
+        <b-icon icon="plus" />
+      </b-navbar-item>
+    </template>
+    <template #end>
+      <slot name="end"></slot>
+
+      <b-navbar-item tag="div">
+        <b-icon icon="logout" />
+      </b-navbar-item>
+    </template>
+  </b-navbar>
+
+  <!-- <div>
     <div class="nav">
       <m-icon name="menu" v-on:click.native="menu" />
       <m-icon name="add" v-on:click.native="add" />
@@ -25,7 +43,7 @@
         <span>Abmelden</span>
       </span>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script>

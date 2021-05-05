@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import Modal from "bootstrap/js/dist/modal";
+ 
 export default {
   props: {
     show: {
@@ -51,7 +51,7 @@ export default {
     }
   },
   mounted() {
-    this.modal = new Modal(this.$refs.modal,{backdrop: 'static', keyboard: false});
+    //this.modal = new Modal(this.$refs.modal,{backdrop: 'static', keyboard: false});
   },
   destroyed() {
     this.modal.dispose();

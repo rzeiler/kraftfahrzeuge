@@ -1,8 +1,33 @@
 <template>
   <div id="dashboard">
     <div class="container">
-      <SiteNav v-on:add="onAdd"></SiteNav>
-      <h1>Fahrzeuge</h1>
+      <SiteNav v-on:add="onAdd">
+        <template v-slot:end>
+          <b-field>
+            <b-input
+              placeholder="Search..."
+              type="search"
+              icon="magnify"
+              icon-clickable
+              @icon-click="searchIconClick"
+            >
+            </b-input>
+          </b-field>
+          <b-navbar-item tag="a">
+            <b-icon icon="magnify" />
+          </b-navbar-item>
+        </template>
+      </SiteNav>
+      <h1 class="title is-2">Fahrzeuge</h1>
+
+      <b-tabs expanded>
+        <b-tab-item v-for="item in itmes" :key="item.value" :label="item.title">
+          {{ filterVehicles(item.value) }}
+
+          {{ item.value }}
+        </b-tab-item>
+      </b-tabs>
+
       <m-tabs
         :selectable="true"
         v-on:selected="onSelected"
@@ -25,8 +50,13 @@
       ></m-tabs>
     </div>
 
-    <Select :show="vehicleList.length > 0" :items="vehicleList" title="Fahrzeug wählen" @close="vehicleList = []" @select="onMenuItemSelected" >
-    
+    <Select
+      :show="vehicleList.length > 0"
+      :items="vehicleList"
+      title="Fahrzeug wählen"
+      @close="vehicleList = []"
+      @select="onMenuItemSelected"
+    >
     </Select>
   </div>
 </template>
@@ -58,6 +88,7 @@ export default {
     showNav() {
       return Object.keys(this.userProfile).length > 1;
     },
+
     getVehicles() {
       if (this.selectedType != "Alle") {
         return this.vehicles.filter(item => {
@@ -73,6 +104,17 @@ export default {
     }
   },
   methods: {
+    filterVehicles(val) {
+      return this.vehicles.filter(
+        item => item.category.toLowerCase().indexOf(val.toLowerCase()) != -1
+      );
+    },
+    laodItems(e) {
+      console.log("laod", e);
+    },
+    searchIconClick() {
+      alert("You wanna make a search?");
+    },
     onClicked(kex) {
       this.$router.push(`/vehicle/${kex}`);
     },
@@ -163,22 +205,22 @@ export default {
 </script>
 
 <style lang="scss" >
-#dashboard {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  box-sizing: content-box;
-}
-.tab-group.small {
-  justify-content: space-between;
-  .tab-item {
-    width: 50px;
-    height: 50px;
-    background-color: #e0e0e0;
-    margin: 10px;
-    flex-grow: unset;
-    border-radius: 10px;
-    box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.3);
-  }
-}
+// #dashboard {
+//   display: flex;
+//   flex-direction: column;
+//   flex-grow: 1;
+//   box-sizing: content-box;
+// }
+// .tab-group.small {
+//   justify-content: space-between;
+//   .tab-item {
+//     width: 50px;
+//     height: 50px;
+//     background-color: #e0e0e0;
+//     margin: 10px;
+//     flex-grow: unset;
+//     border-radius: 10px;
+//     box-shadow: 0px 5px 20px rgba(0, 0, 0, 0.3);
+//   }
+// }
 </style>
