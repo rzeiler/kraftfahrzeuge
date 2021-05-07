@@ -1,3 +1,4 @@
+import { SnackbarProgrammatic } from "buefy";
 import Vue from "vue";
 import Vuex from "vuex";
 import * as fb from "../firebase";
@@ -53,12 +54,16 @@ const store = new Vuex.Store({
   state: {
     userProfile: {},
     vehicles: [],
-    error: null,
+    error: {
+      active: false,
+      msg: "",
+    },
     events: [],
   },
   mutations: {
     setError(state, val) {
-      state.error = val;
+      state.error.active = true;
+      state.error.msg = val;
     },
     setEvents(state, val) {
       state.events = val;
@@ -172,22 +177,6 @@ const store = new Vuex.Store({
       });
 
       dispatch("fetchUserProfile", { uid: userId });
-
-      // update all vehicles by user
-      // const postDocs = await fb.vehiclesCollection.where('userId', '==', userId).get()
-      // postDocs.forEach(doc => {
-      //   fb.vehiclesCollection.doc(doc.id).update({
-      //     userName: user.name
-      //   })
-      // })
-
-      // // update all comments by user
-      // const commentDocs = await fb.commentsCollection.where('userId', '==', userId).get()
-      // commentDocs.forEach(doc => {
-      //   fb.commentsCollection.doc(doc.id).update({
-      //     userName: user.name
-      //   })
-      // })
     },
   },
   getters: {

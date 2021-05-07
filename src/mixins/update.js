@@ -9,6 +9,10 @@ export default {
   },
 
   created() {
+    // setTimeout(() => {
+    //   this.updateAvailable({ detail: null });
+    // }, 2000);
+
     // Listen for our custom event from the SW registration
     document.addEventListener("swUpdated", this.updateAvailable, {
       once: true,
@@ -22,8 +26,6 @@ export default {
       // Here the actual reload of the page occurs
       window.location.reload();
     });
-
-     
   },
 
   methods: {
@@ -33,6 +35,22 @@ export default {
     updateAvailable(event) {
       this.registration = event.detail;
       this.updateExists = true;
+      const self = this;
+      this.$buefy.snackbar.open({
+        message: "Es gibt Neuigkeiten!",
+        type: "is-danger",
+        duration: 10000,
+        actionText: "Anwendung neu laden.",
+        position: "is-bottom",
+        indefinite: true,
+        onAction: () => {
+          self.refreshApp();
+          this.$buefy.toast.open({
+            message: "Anwendung wird neu geladen...",
+            queue: false,
+          });
+        },
+      });
     },
 
     // Called when the user accepts the update

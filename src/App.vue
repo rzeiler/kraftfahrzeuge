@@ -3,36 +3,38 @@
     <transition :duration="800" name="slide">
       <router-view />
     </transition>
-
-
-<div v-if="updateExists">
-  Eine neue Version ist verfügbar!
- call refreshApp()
-</div>
-
-
-    <div class="toast" v-if="error">
-      <div>
-        {{ error }}
-      </div>
-      <span class="close" @click="close">&#x2715;</span>
-    </div>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
-import update from "./mixins/update";
+
 export default {
   components: {},
   computed: {
     ...mapState(["userProfile", "error"])
   },
-  mixins: [update],
   methods: {
     close() {
       this.$store.commit("setError", "");
     }
+  },
+  created() {
+    this.unsubscribe = this.$store.subscribe((mutation, state) => {
+      if (mutation.type === "setError") {
+        this.$buefy.snackbar.open({
+          message: state.error.msg,
+          type: "is-danger",
+          duration: 10000,
+          actionText: "Ok",
+          position: "is-bottom",
+          indefinite: true
+        });
+      }
+    });
+  },
+  beforeDestroy() {
+    this.unsubscribe();
   }
 };
 </script>
@@ -50,10 +52,5 @@ export default {
 #app {
   width: 100%;
   height: 100%;
-  
-  
-
 }
-
-
 </style>

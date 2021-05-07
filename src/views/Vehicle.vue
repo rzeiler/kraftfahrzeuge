@@ -1,10 +1,29 @@
 <template>
   <div v-if="vehicle" id="vehicle" class="d-flex flex-column vh-100">
-    <m-page-head :title="pageHeadTitle" @close="onCloseClick">
-      <m-icon name="delete" v-if="vehicle.uid" v-on:click.native="confirmDelete" />
-      <m-icon name="done" :disable="hasChange" v-if="vehicle.uid" v-on:click.native="update" />
-      <m-icon name="done" :disable="hasChange" v-else v-on:click.native="create" />
-    </m-page-head>
+    <SiteNav>
+      <template v-slot:start>
+        <b-navbar-item tag="router-link" to="/">
+          <b-icon icon="chevron-left" />
+        </b-navbar-item>
+        <b-navbar-item tag="div">
+          {{ pageTitle }}
+        </b-navbar-item>
+      </template>
+
+      <template v-slot:end>
+        <b-navbar-item tag="a" @click="update" v-if="vehicle.uid">
+          <b-icon icon="check" />
+        </b-navbar-item>
+        <b-navbar-item tag="a" @click="create" v-else>
+          <b-icon icon="check" />
+        </b-navbar-item>
+        <b-navbar-item tag="a" @click="confirmDelete">
+          <b-icon icon="delete" />
+        </b-navbar-item>
+      </template>
+    </SiteNav>
+    
+    <m-icon name="close" v-on:click.native="close" />
 
     <form class="d-flex flex-column p-2 h-100">
       <div class="image" v-on:click="changeImage" v-bind:style="background">
@@ -27,9 +46,6 @@
         @keyup="updateValue(this)"
       />
 
-
-
-
       <label for="mileage" class="form-label">Kilometerstand</label>
       <input
         class="form-control"
@@ -51,33 +67,13 @@
         @input="updateValue(vehicle)"
       />
       <div class="flex-fill"></div>
-
-       
     </form>
-
-    <!-- Modal -->
-    <Modal :show="showModal">
-      <template v-slot:title>
-        <h5 class="modal-title">Achtung</h5>
-        <m-icon
-          name="close"
-          class="btn-close"
-          v-on:click.native="showModal = false"
-        />
-      </template>
-      Soll das Fahrzeug wirklich gelöscht werden?
-      <template v-slot:footer>
-        <button type="button" class="btn btn-danger" @click="remove()">
-          Löschen
-        </button>
-      </template>
-    </Modal>
   </div>
 </template>
 
 <script>
 import { vehicleImages, auth } from "@/firebase";
-import Modal from "@/components/Modal";
+
 import moment from "moment";
 
 const defaultDate = {
@@ -90,13 +86,13 @@ const defaultDate = {
 };
 
 export default {
-  components: { Modal },
+  components: {},
   data() {
     return {
       event: null,
-      pageHeadTitle: "Fahrzeug anlegen",
+      pageTitle: "Fahrzeug anlegen",
       showModal: false,
-      hasChange:true
+      hasChange: true
     };
   },
   computed: {
@@ -104,7 +100,7 @@ export default {
       const id = this.$route.params.id;
       if (id != "new") {
         this.$nextTick(() => {
-          this.pageHeadTitle = "Fahrzeug bearbeiten";
+          this.pageTitle = "Fahrzeug bearbeiten";
         });
         const data = this.$store.state.vehicles.find(
           v => v.id === this.$route.params.id
@@ -134,9 +130,19 @@ export default {
   },
 
   methods: {
-    updateValue(e) {
-       
+    confirmDelete() {
+      this.$buefy.dialog.confirm({
+        title: "Achtung",
+        message: "Soll das Fahrzeug wirklich gelöscht werden?",
+        confirmText: "Ja",
+        cancelText: "Abbrechen",
+        type: "is-danger",
+        hasIcon: true,
+        onConfirm: () => this.$buefy.toast.open("Account deleted!")
+      });
+    },
 
+    updateValue(e) {
       this.hasChange = false;
       console.log("updateValue", e);
     },
@@ -145,10 +151,6 @@ export default {
     },
     changeImage() {
       this.$refs.image.click();
-    },
-    confirmDelete() {
-      this.showModal = true;
-      console.log("this.showModal", this.showModal);
     },
     remove() {
       const self = this;

@@ -92,7 +92,7 @@ export default {
     .image {
       display: flex;
       min-height: 30%;
-      background-image: url("../assets/bmw.jpg");
+      //background-image: url("../assets/bmw.jpg");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
