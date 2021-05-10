@@ -10,6 +10,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 const vehicleImages = firebase.storage();
+ 
 
 // collection references
 const usersCollection = db.collection("users");
@@ -17,4 +18,11 @@ const vehiclesCollection = db.collection("vehicles");
 const eventCollection = db.collection("vehicle-events");
 
 // export utils/refs
-export { db, auth, usersCollection, vehiclesCollection, vehicleImages,eventCollection};
+export {
+  db,
+  auth,
+  usersCollection,
+  vehiclesCollection,
+  vehicleImages,
+  eventCollection,
+};

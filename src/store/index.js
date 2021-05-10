@@ -54,6 +54,7 @@ const store = new Vuex.Store({
   state: {
     userProfile: {},
     vehicles: [],
+    loading: false,
     error: {
       active: false,
       msg: "",
@@ -61,7 +62,11 @@ const store = new Vuex.Store({
     events: [],
   },
   mutations: {
+    setLoading(state, val) {
+      state.loading = val;
+    },
     setError(state, val) {
+      state.loading = false;
       state.error.active = true;
       state.error.msg = val;
     },
@@ -145,28 +150,59 @@ const store = new Vuex.Store({
         state.vehicles.find((v) => v.id === key)
       );
     },
-    async createVehicle({ state, commit }, vehicle) {
-      // create in firebase
-      await fb.vehiclesCollection.add({
-        createdOn: new Date(),
-        title: vehicle.title,
-        mileage: vehicle.mileage,
-        nextcheck: vehicle.nextcheck,
-        uid: fb.auth.currentUser.uid,
-        userName: state.userProfile.name,
-        oil: [],
-      });
+    async saveImage({ state, commit }, vehicle) {
+      commit("setLoading", true);
+      await fb.vehicleImages
+        .ref(`vehicleImages/${fb.auth.currentUser.uid}/${vehicle.key}`)
+        .putString(vehicle.base64, "base64")
+        .then((snapshot) => {
+          snapshot.ref.getDownloadURL().then((url) => {
+            store.state.vehicles.find((v) => v.id === vehicle.key).image = url;
+          });
+          commit("setLoading", false);
+        });
     },
-    async updateVehicle({ state, commit }, vehicle) {
-      // create in firebase
-      await fb.vehiclesCollection.doc(vehicle.key).update({
-        title: vehicle.title,
-        mileage: vehicle.mileage,
-        nextcheck: vehicle.nextcheck,
-        uid: fb.auth.currentUser.uid,
-        userName: state.userProfile.name,
-        oil: [],
-      });
+    async createVehicle({ state, commit }, vehicle) {
+      commit("setLoading", true);
+
+      fb.vehiclesCollection
+        .add({
+          category: vehicle.category,
+          createdOn: new Date(),
+          title: vehicle.title,
+          mileage: vehicle.mileage,
+          nextcheck: vehicle.nextcheck,
+          uid: fb.auth.currentUser.uid,
+          userName: state.userProfile.name,
+          oil: [],
+        })
+        .then((vehicle) => {
+          commit("setLoading", false);
+          commit("setVehicle",vehicle)
+          console.log("save title", vehicle.title);
+        })
+        .catch((err) => {
+          commit("setError", err.message);
+        });
+    },
+    async updateVehicle({ state, commit, dispatch }, vehicle) {
+      commit("setLoading", true);
+      await fb.vehiclesCollection
+        .doc(vehicle.key)
+        .update({
+          title: vehicle.title,
+          mileage: vehicle.mileage,
+          nextcheck: vehicle.nextcheck,
+          uid: fb.auth.currentUser.uid,
+          userName: state.userProfile.name,
+          oil: [],
+        })
+        .then(() => {
+          commit("setLoading", false);
+        })
+        .catch((err) => {
+          commit("setError", err.message);
+        });
     },
     async updateProfile({ dispatch }, user) {
       const userId = fb.auth.currentUser.uid;

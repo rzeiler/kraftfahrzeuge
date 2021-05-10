@@ -1,5 +1,5 @@
 <template>
-  <div v-if="vehicle" id="vehicle" class="d-flex flex-column vh-100">
+  <div v-if="vehicle" class="container">
     <SiteNav>
       <template v-slot:start>
         <b-navbar-item tag="router-link" to="/">
@@ -22,52 +22,38 @@
         </b-navbar-item>
       </template>
     </SiteNav>
-    
-    <m-icon name="close" v-on:click.native="close" />
 
-    <form class="d-flex flex-column p-2 h-100">
-      <div class="image" v-on:click="changeImage" v-bind:style="background">
-        <input
-          type="file"
-          ref="image"
-          accept="image/*"
-          v-on:change="previewFile"
-        />
-      </div>
+    <b-field label="Marke">
+      <b-input placeholder="Skoda" v-model="vehicle.title"></b-input>
+    </b-field>
 
-      <label for="title" class="form-label">Marke</label>
-      <input
-        class="form-control"
-        type="text"
-        id="title"
-        placeholder="Skoda..."
-        v-model="vehicle.title"
-        @input="updateValue(vehicle)"
-        @keyup="updateValue(this)"
-      />
+    <b-field label="Kilometerstand">
+      <b-numberinput
+        :step="100"
+        placeholder="10312"
+        v-model="vehicle.mileage"
+      ></b-numberinput>
+    </b-field>
 
-      <label for="mileage" class="form-label">Kilometerstand</label>
-      <input
-        class="form-control"
-        type="number"
-        id="mileage"
-        placeholder="10312..."
-        v-model.trim="vehicle.mileage"
-        @input="updateValue(vehicle)"
-      />
+    <b-field label="Nächster HU / AU Termin">
+      <b-datepicker
+        :first-day-of-week="1"
+        icon="calendar-today"
+        locale="de-DE"
+        v-model="vehicle.nextcheck"
+        editable
+      >
+      </b-datepicker>
+    </b-field>
 
-      <label for="nextcheck" class="form-label">HU / AU Termin</label>
-      <input
-        class="form-control"
-        type="Date"
-        id="nextcheck"
-        defaultValue="01.01.2020"
-        placeholder="12.2.2022..."
-        v-model.trim="vehicle.nextcheck"
-        @input="updateValue(vehicle)"
-      />
-      <div class="flex-fill"></div>
-    </form>
+    <b-field class="file">
+      <b-upload accept="image/*" v-model="file" name="image" expanded>
+        <a class="button is-primary is-fullwidth">
+          <b-icon icon="upload"></b-icon>
+          <span>{{ file.name || "Bild zum Fahrzeug" }}</span>
+        </a>
+      </b-upload>
+    </b-field>
   </div>
 </template>
 
@@ -89,11 +75,23 @@ export default {
   components: {},
   data() {
     return {
+      file: {},
       event: null,
       pageTitle: "Fahrzeug anlegen",
       showModal: false,
       hasChange: true
     };
+  },
+  watch: {
+    file: function(o) {
+      var reader = new FileReader();
+      reader.onload = e => {
+        //data:image/jpeg;base64,
+        const data = e.target.result;
+        this.vehicle.base64 = data.substring(data.indexOf(",") + 1);
+      };
+      reader.readAsDataURL(o);
+    }
   },
   computed: {
     vehicle() {
@@ -107,11 +105,10 @@ export default {
         );
         if (data) {
           const date = new Date(data.nextcheck.seconds * 1000);
-
           return {
             title: data.title,
-            mileage: data.mileage,
-            nextcheck: moment(date).format("YYYY-MM-DD"),
+            mileage: parseInt(data.mileage),
+            nextcheck: moment(date).toDate(),
             uid: data.uid,
             image: data.image,
             oil: []
@@ -166,13 +163,24 @@ export default {
     create() {
       const self = this;
       this.$store
-        .dispatch("createVehicle", {
-          title: this.vehicle.title,
-          mileage: this.vehicle.mileage,
-          nextcheck: moment(this.vehicle.nextcheck).toDate()
-        })
+        .dispatch("createVehicle", 
+          {
+            title: this.vehicle.title,
+            mileage: this.vehicle.mileage,
+            nextcheck: moment(this.vehicle.nextcheck).toDate(),
+            category: ""
+          })
         .then(function() {
-          self.$router.push({ path: "/" });
+
+          
+          this.$store
+            .dispatch("saveImage", {
+              key: this.$route.params.id,
+              base64: this.vehicle.base64
+            })
+            .then(() => {
+              self.$router.push({ path: "/" });
+            });
         });
     },
     update() {
@@ -184,55 +192,17 @@ export default {
           mileage: this.vehicle.mileage,
           nextcheck: moment(this.vehicle.nextcheck).toDate()
         })
-        .then(
-          function() {
-            self.$router.push({ path: "/" });
-          },
-          function(err) {
-            console.log(err);
-          }
-        );
-    },
-    previewFile(ev) {
-      const file = ev.target.files[0];
-
-      const storageRef = vehicleImages
-        .ref(`vehicleImages/${auth.currentUser.uid}/${this.$route.params.id}`)
-        .put(file);
-      storageRef.on(
-        `state_changed`,
-        snapshot => {
-          this.uploadValue =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        },
-        error => {
-          console.log(error.message);
-        },
-        () => {
-          storageRef.snapshot.ref.getDownloadURL().then(url => {
-            console.log("url", url);
-          });
-        }
-      );
-    },
-    createImage(e) {
-      console.log(e);
-    },
-    fileReaderLoaded(arg) {
-      const src_image = new Image();
-      src_image.onload = function() {};
-      src_image.src = this.result;
+        .then(() => {
+          this.$store
+            .dispatch("saveImage", {
+              key: this.$route.params.id,
+              base64: this.vehicle.base64
+            })
+            .then(() => {
+              self.$router.push({ path: "/" });
+            });
+        });
     }
-  },
-  mounted() {
-    if (this.$route.params.event) {
-      this.event = this.$route.params.event;
-    }
-  },
-  destroyed() {
-    const body = document.body;
-    body.style.backgroundImage = "unset";
-    body.style.backdropFilter = "unset";
   },
   filters: {
     json(val) {
@@ -253,9 +223,4 @@ export default {
  
 
 <style lang="scss" scoped>
-.nav {
-  div {
-    border-right: 1px solid red;
-  }
-}
 </style>

@@ -82,6 +82,7 @@
               :icon-left="e.icon"
             />
           </template>
+          <b-dropdown-item custom class="has-background-dark has-text-primary-light">Fahrzeug wählen</b-dropdown-item>
           <b-dropdown-item
             aria-role="listitem"
             v-for="v in vehicles"
@@ -199,53 +200,6 @@ export default {
           params: { id: value.id, event: item.id }
         });
       });
-    },
-    edit(vehicle, event) {
-      const rect = event.target.getBoundingClientRect();
-      console.log(rect.top);
-      this.styleVehicle = {
-        position: "absolute",
-        top: `${rect.top}px`,
-        left: `${rect.left}px`,
-        width: `${rect.width}px`,
-        height: `${rect.height}px`,
-        margin: 0
-      };
-      this.vehicle = vehicle;
-      this.styleVehicle = {
-        position: "absolute",
-        margin: 0,
-        marginTop: `${-rect.top}px`,
-        marginLeft: `${-rect.left}px`,
-        width: `100vw`,
-        height: `100vh`
-      };
-    },
-    createVehicle() {
-      this.modal.display = "block";
-    },
-
-    last(arr) {
-      return arr[arr.length - 1];
-    },
-
-    toggleCommentModal(post) {
-      this.showCommentModal = !this.showCommentModal;
-
-      // if opening modal set selectedPost, else clear
-      if (this.showCommentModal) {
-        this.selectedPost = post;
-      } else {
-        this.selectedPost = {};
-      }
-    },
-    async viewPost(post) {
-      this.fullPost = post;
-      this.showPostModal = true;
-    },
-    closePostModal() {
-      this.postComments = [];
-      this.showPostModal = false;
     }
   },
 

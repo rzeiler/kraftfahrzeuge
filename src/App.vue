@@ -3,6 +3,7 @@
     <transition :duration="800" name="slide">
       <router-view />
     </transition>
+        <b-loading :is-full-page="true" v-model="loading" :can-cancel="true"></b-loading>
   </div>
 </template>
 
@@ -12,7 +13,7 @@ import { mapState } from "vuex";
 export default {
   components: {},
   computed: {
-    ...mapState(["userProfile", "error"])
+    ...mapState(["userProfile", "error","loading"])
   },
   methods: {
     close() {

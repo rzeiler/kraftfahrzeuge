@@ -11,6 +11,7 @@ import "./registerServiceWorker";
 
 Vue.component("SiteNav", SiteNav);
 
+ 
 
 import {
   Navbar,
@@ -26,8 +27,14 @@ import {
   Dialog,
   Toast,
   Notification,
-  Snackbar
+  Snackbar,
+  Numberinput,
+  Datepicker,
+  Upload,
+  Loading
 } from "buefy";
+
+ 
 
 Vue.use(Navbar);
 Vue.use(Input);
@@ -43,6 +50,11 @@ Vue.use(Dialog);
 Vue.use(Toast);
 Vue.use(Notification);
 Vue.use(Snackbar);
+Vue.use(Numberinput);
+Vue.use(Datepicker);
+Vue.use(Upload);
+Vue.use(Loading);
+
 
 Vue.config.productionTip = false;
  
