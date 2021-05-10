@@ -59,16 +59,17 @@
 
 <script>
 import { vehicleImages, auth } from "@/firebase";
-
+import { mapState } from "vuex";
 import moment from "moment";
 
 const defaultDate = {
   title: null,
   mileage: null,
-  nextcheck: null,
+  nextcheck: new Date(),
   uid: null,
   image: null,
-  oil: []
+  base64: null,
+  oil: [],
 };
 
 export default {
@@ -78,22 +79,20 @@ export default {
       file: {},
       event: null,
       pageTitle: "Fahrzeug anlegen",
-      showModal: false,
-      hasChange: true
     };
   },
   watch: {
-    file: function(o) {
+    file: function (o) {
       var reader = new FileReader();
-      reader.onload = e => {
-        //data:image/jpeg;base64,
+      reader.onload = (e) => {
         const data = e.target.result;
         this.vehicle.base64 = data.substring(data.indexOf(",") + 1);
       };
       reader.readAsDataURL(o);
-    }
+    },
   },
   computed: {
+    ...mapState(["userProfile", "vehicles"]),
     vehicle() {
       const id = this.$route.params.id;
       if (id != "new") {
@@ -101,17 +100,17 @@ export default {
           this.pageTitle = "Fahrzeug bearbeiten";
         });
         const data = this.$store.state.vehicles.find(
-          v => v.id === this.$route.params.id
+          (v) => v.id === this.$route.params.id
         );
         if (data) {
-          const date = new Date(data.nextcheck.seconds * 1000);
           return {
             title: data.title,
             mileage: parseInt(data.mileage),
-            nextcheck: moment(date).toDate(),
+            nextcheck: data.nextcheck,
             uid: data.uid,
             image: data.image,
-            oil: []
+            base64: null,
+            oil: [],
           };
         } else {
           return defaultDate;
@@ -120,10 +119,6 @@ export default {
         return defaultDate;
       }
     },
-    background() {
-      const bi = { "background-image": `url('${this.vehicle.image}')` };
-      return bi;
-    }
   },
 
   methods: {
@@ -135,27 +130,17 @@ export default {
         cancelText: "Abbrechen",
         type: "is-danger",
         hasIcon: true,
-        onConfirm: () => this.$buefy.toast.open("Account deleted!")
+        onConfirm: () => this.$buefy.toast.open("Account deleted!"),
       });
     },
 
-    updateValue(e) {
-      this.hasChange = false;
-      console.log("updateValue", e);
-    },
-    onCloseClick() {
-      this.$router.push({ path: "/" });
-    },
-    changeImage() {
-      this.$refs.image.click();
-    },
     remove() {
       const self = this;
       this.$store
         .dispatch("removeVehicle", {
-          key: this.$route.params.id
+          key: this.$route.params.id,
         })
-        .then(function() {
+        .then(function () {
           self.modal.hide();
           self.$router.push({ path: "/" });
         });
@@ -163,24 +148,26 @@ export default {
     create() {
       const self = this;
       this.$store
-        .dispatch("createVehicle", 
-          {
-            title: this.vehicle.title,
-            mileage: this.vehicle.mileage,
-            nextcheck: moment(this.vehicle.nextcheck).toDate(),
-            category: ""
-          })
-        .then(function() {
-
-          
-          this.$store
-            .dispatch("saveImage", {
-              key: this.$route.params.id,
-              base64: this.vehicle.base64
-            })
-            .then(() => {
-              self.$router.push({ path: "/" });
-            });
+        .dispatch("createVehicle", {
+          title: this.vehicle.title,
+          mileage: this.vehicle.mileage,
+          nextcheck: moment(this.vehicle.nextcheck).toDate(),
+          category: "",
+        })
+        .then(function () {
+          console.log(this.vehicle.base64);
+          if (this.vehicle.base64) {
+            this.$store
+              .dispatch("saveImage", {
+                key: this.$route.params.id,
+                base64: this.vehicle.base64,
+              })
+              .then(() => {
+                self.$router.push({ path: "/" });
+              });
+          } else {
+            self.$router.push({ path: "/" });
+          }
         });
     },
     update() {
@@ -190,20 +177,26 @@ export default {
           key: this.$route.params.id,
           title: this.vehicle.title,
           mileage: this.vehicle.mileage,
-          nextcheck: moment(this.vehicle.nextcheck).toDate()
+          nextcheck: moment(this.vehicle.nextcheck).toDate(),
         })
         .then(() => {
-          this.$store
-            .dispatch("saveImage", {
-              key: this.$route.params.id,
-              base64: this.vehicle.base64
-            })
-            .then(() => {
-              self.$router.push({ path: "/" });
-            });
+          console.log(this.vehicle.base64);
+          if (this.vehicle.base64) {
+            this.$store
+              .dispatch("saveImage", {
+                key: this.$route.params.id,
+                base64: this.vehicle.base64,
+              })
+              .then(() => {
+                self.$router.push({ path: "/" });
+              });
+          } else {
+            self.$router.push({ path: "/" });
+          }
         });
-    }
+    },
   },
+  mounted() {},
   filters: {
     json(val) {
       return JSON.stringify(val);
@@ -215,8 +208,8 @@ export default {
       moment.locale("de");
       let date = val.toDate();
       return moment(date).format("MM.YYYY");
-    }
-  }
+    },
+  },
 };
 </script>
 

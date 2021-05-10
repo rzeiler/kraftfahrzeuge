@@ -3,52 +3,8 @@ import Vue from "vue";
 import Vuex from "vuex";
 import * as fb from "../firebase";
 import router from "../router/index";
-
+import moment from "moment";
 Vue.use(Vuex);
-
-fb.auth.onAuthStateChanged((user) => {
-  if (user) {
-    // realtime firebase
-
-    fb.eventCollection.onSnapshot((snapshot) => {
-      let events = [];
-      snapshot.forEach((doc) => {
-        let event = doc.data();
-        event.id = doc.id;
-        event.selected = false;
-        events.push(event);
-      });
-      store.commit("setEvents", events);
-    });
-
-    fb.vehiclesCollection
-      .orderBy("createdOn", "desc")
-      .where("uid", "==", user.uid)
-      .onSnapshot((snapshot) => {
-        let postsArray = [];
-
-        console.log("user.uid", user.uid, snapshot);
-
-        snapshot.forEach((_doc) => {
-          let post = _doc.data();
-          post.id = _doc.id;
-          post.image = null;
-          fb.vehicleImages
-            .ref(`vehicleImages/${user.uid}/${post.id}`)
-            .getDownloadURL()
-            .then((url) => {
-              post.image = url;
-            });
-
-          postsArray.push(post);
-        });
-
-        store.commit("setPosts", postsArray);
-      });
-  } else {
-    store.commit("setPosts", []);
-  }
-});
 
 const store = new Vuex.Store({
   state: {
@@ -216,8 +172,60 @@ const store = new Vuex.Store({
     },
   },
   getters: {
-    getVehicleById: (state) => (id) => state.vehicles.find((v) => v.id === id),
+    getVehicle: (state) => (id) => state.vehicles.find((v) => v.id === id),
   },
+});
+
+fb.auth.onAuthStateChanged((user) => {
+  store.commit("setLoading", true);
+  if (user) {
+    // realtime firebase
+
+    fb.eventCollection.onSnapshot((snapshot) => {
+      let events = [];
+      snapshot.forEach((doc) => {
+        let event = doc.data();
+        event.id = doc.id;
+        event.selected = false;
+        events.push(event);
+      });
+      store.commit("setEvents", events);
+    });
+
+    fb.vehiclesCollection
+      .orderBy("createdOn", "desc")
+      .where("uid", "==", user.uid)
+      .onSnapshot((snapshot) => {
+        let postsArray = [];
+
+        console.log("user.uid", user.uid, snapshot);
+
+        snapshot.forEach((_doc) => {
+          const post = _doc.data();
+          const date = new Date(post.nextcheck.seconds * 1000);
+          post.id = _doc.id;
+          post.image = null;
+          post.nextcheck = moment(date).toDate(),
+
+          fb.vehicleImages
+            .ref(`vehicleImages/${user.uid}/${post.id}`)
+            .getDownloadURL()
+            .then((url) => {
+              post.image = url;
+            }).catch((err) => {
+              //store.commit("setError", err.message);
+            });
+
+          postsArray.push(post);
+        });
+
+        store.commit("setPosts", postsArray);
+        store.commit("setLoading", false);
+      });
+  } else {
+    store.commit("setPosts", []);
+    store.commit("setLoading", false);
+  }
 });
 
 export default store;

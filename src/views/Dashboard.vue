@@ -61,7 +61,7 @@
                   <p>{{ item.mileage }}</p>
                   <b-progress
                     type="is-danger"
-                    :value="progressValue(item.nextcheck.toDate())"
+                    :value="progressValue(item.nextcheck)"
                   />
                 </div>
               </div>
